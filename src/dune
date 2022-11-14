@@ -1,0 +1,8 @@
+(library
+  (name langid)
+  (modules
+    langid
+    )
+   (libraries
+   core
+   torch))

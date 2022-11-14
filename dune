@@ -1,0 +1,7 @@
+(rule
+  (target finalproj.zip)
+  (deps 
+    src/langid.ml
+  )
+  (action
+    (run zip -R finalproj.zip %{deps})))
