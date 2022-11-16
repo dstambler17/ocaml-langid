@@ -38,6 +38,18 @@ Given input sentence, model, and top_N, output model likelihoods
 *)
 val top_choices: string -> Model -> int -> (string * float) list
 
+(*
+Define list of answers for the game setting. Given a groundtruth and all possible languages, 
+output a list of languages containing groundtruth, paired with a bool whether it is the correct answer
+*)
+val game_choices: string -> string list -> (string * bool) list
+
+(*
+Given an input and ground truth, score user guess vs model output  
+1 if user wins, .5 if tie, 0 if user 
+*)
+val score: string -> string -> int -> Model -> int
+
 (* 
 OVERALL USAGE
 ########################################################################
