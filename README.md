@@ -3,15 +3,21 @@ Lang ID library for Ocaml
 
 
 **1) An overview of the purpose of the project**
+
  The purpose of the project is to make an opam package for LangID, a package that currently doesn’t exist in the OCaml ecosystem. Given a string, detect what language it's written in as well as the confidence of the underlying model.  (similar to this python library: https://github.com/saffsd/langid.py) We will use this library in a command line game.
+
 **2) A list of libraries you plan on using**
+
 We plan on using `OCaml Core`, `OCaml torch` Ocaml Unicode character packages
 
 **3) .mli file**
-- See langit.mli 
+- See langid.mli 
+
 **4) Include a mock of a use of your application, along the lines of the Minesweeper example above but showing the complete protocol.**
 - See example of use cases shown in langid.mli
+
 **5) Make sure you have installed and verified any extra libraries will in fact work on your computer setup, by running their tutorial examples.**
+
     We installed ocaml torch via `opam install torch` and then followed the example tutorial
     shown here: https://ocaml.org/p/torch/0.9
 
