@@ -14,7 +14,7 @@ We plan on using `OCaml Core`, `OCaml torch` `core_unix`, `core_unix.sys_unix` `
 - See langid.mli 
 
 **4) Include a mock of a use of your application, along the lines of the Minesweeper example above but showing the complete protocol.**
-- See example of use cases shown in langid.mli
+- See examples of use cases provided in langid.mli
 
 **5) Make sure you have installed and verified any extra libraries will in fact work on your computer setup, by running their tutorial examples.**
 

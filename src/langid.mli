@@ -16,14 +16,26 @@ Given an input string and a model, classify the model
 *)
 val classify: string -> Model.t -> (float * string) list
 
-set_languages
+(*
+Set the language set used by the identifier.   
+*)
+val set_languages: 
 
-rank
+(*
+Ranks all the languages in the model according
+to the likelihood that the string is written in each language.
+*)
+val rank:
 
-"""
+(*
 Map an instance into the feature space of the trained model.
-"""
-instance2fv
+*)
+val instance2fv:
+
+(*
+Given input sentence, model, and top_N, output model likelihoods   
+*)
+val top_choices: string -> Model -> int -> (string * float) list
 
 (* 
 OVERALL USAGE
