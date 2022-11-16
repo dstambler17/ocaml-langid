@@ -1,6 +1,7 @@
 [@@@ocaml.warning "-33"]
 
 open Torch
+
 (* 
 Load model file from path, get back a string representation of the model
 *)
@@ -9,7 +10,7 @@ val load_model_file: string -> string
 (* 
 Load torch model from weights    
 *)
-val load_model_weights: string -> Model
+val load_model_weights: string -> Model.t
 
 (* 
 Given an input string and a model, classify the model
@@ -19,18 +20,18 @@ val classify: string -> Model.t -> (float * string) list
 (*
 Set the language set used by the identifier.   
 *)
-val set_languages: 
+val set_languages: string list -> Model.t -> Model.t
 
 (*
 Ranks all the languages in the model according
 to the likelihood that the string is written in each language.
 *)
-val rank:
+val rank: string -> Model.t -> (string * float) list
 
 (*
 Map an instance into the feature space of the trained model.
 *)
-val instance2fv:
+val instance2fv: string -> Model -> 'a list
 
 (*
 Given input sentence, model, and top_N, output model likelihoods   
