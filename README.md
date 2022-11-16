@@ -1,6 +1,7 @@
 # ocaml-langid
 Lang ID library for Ocaml
 
+### Project Team: Gurion Marks, Daniel Stambler
 
 **1) An overview of the purpose of the project**
 
