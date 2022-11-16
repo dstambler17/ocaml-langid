@@ -18,26 +18,10 @@ val classify: string -> Model.t -> (float * string) list
 
 set_languages
 
-
 rank
 
 """
 Map an instance into the feature space of the trained model.
 """
 instance2fv
-
-
-
-(* 
-EXAMPLE OF USAGE
-####################################################################################
-$ ./langid.exe 
-
-$ ./langid.exe
-
-$ ./langid.exe 
-
-$ ./langid.exe 
-
-*)
 
