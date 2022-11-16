@@ -2,31 +2,34 @@
 
 open Torch
 
+(*BELOW ARE THE MLI DECLARATIONS SPECIFIC FOR THE LANG ID LIBRARY*)
+
 (* 
 Load model file from path, get back a string representation of the model
 *)
 val load_model_file: string -> string
 
 (* 
-Load torch model from weights    
+Load torch model from weights. Given a string, return the ocaml torch representation of a model  
 *)
 val load_model_weights: string -> Model.t
 
 (* 
-Given an input string and a model, classify the model
+Given an input string and a model, call the UTF-8 encoder, and pass it through the model
+Return a probability distribution over
+all possible lang id types
+The results will look something like this:
+
+Input String: "I am an example"
+[(0.7, 'en'); (0.15, 'fr'), (.1, 'cn') ...]
 *)
 val classify: string -> Model.t -> (float * string) list
 
 (*
-Set the language set used by the identifier.   
-*)
-val set_languages: string list -> Model.t -> Model.t
-
-(*
-Ranks all the languages in the model according
+Given the model predictions, sorts the model predictions according
 to the likelihood that the string is written in each language.
 *)
-val rank: string -> Model.t -> (string * float) list
+val rank: (string * float) list -> (string * float) list
 
 (*
 Map an instance into the feature space of the trained model.
@@ -34,9 +37,15 @@ Map an instance into the feature space of the trained model.
 val instance2fv: string -> Model -> 'a list
 
 (*
-Given input sentence, model, and top_N, output model likelihoods   
+Given input sentence, model, and top_N, output model likelihoods
+and return the top n results
+Calls the rank and classify methods   
 *)
 val top_choices: string -> Model -> int -> (string * float) list
+
+
+
+(*BELOW ARE THE MLI DECLARATIONS SPECIFIC FOR THE COMMAND LINE GAME*)
 
 (*
 Define list of answers for the game setting. Given a groundtruth and all possible languages, 
