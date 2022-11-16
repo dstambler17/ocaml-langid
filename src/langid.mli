@@ -34,7 +34,7 @@ val rank: (string * float) list -> (string * float) list
 (*
 Map an instance into the feature space of the trained model.
 *)
-val instance2fv: string -> Model -> 'a list
+val instance2fv: string -> Model.t -> 'a list
 
 (*
 Given input sentence, model, and top_N, output model likelihoods
@@ -48,16 +48,45 @@ val top_choices: string -> Model -> int -> (string * float) list
 (*BELOW ARE THE MLI DECLARATIONS SPECIFIC FOR THE COMMAND LINE GAME*)
 
 (*
+Get an example and its ground truth from preloaded examples
+*)
+val pick_targets: (string * string) list -> (string * string)
+
+(*
 Define list of answers for the game setting. Given a groundtruth and all possible languages, 
 output a list of languages containing groundtruth, paired with a bool whether it is the correct answer
 *)
 val game_choices: string -> string list -> (string * bool) list
 
 (*
-Given an input and ground truth, score user guess vs model output  
+Score user guess vs model output  
+bools are outputs of check player and model response functions
 1 if user wins, .5 if tie, 0 if user 
 *)
-val score: string -> string -> int -> Model -> int
+val evaluate_example: bool -> bool -> float
+
+(*
+Check if the player guessed correctly or not   
+*)
+val check_player_response: int -> (string * bool) list -> bool
+
+(*
+given model guess and groundtruth, check if model guessed correctly
+*)
+val check_model_response: string -> (string * bool) list -> bool
+
+(*
+Generate output based on recent event
+takes user and model correctness, as well as groundtruth, and returns a string to 
+communicate with user   
+*)
+val event_string: bool -> bool -> string -> string
+
+(*
+Pick winner based on scores at the end of the game   
+*)
+val evaluate_winner: int -> int -> bool 
+
 
 (* 
 OVERALL USAGE
