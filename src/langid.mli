@@ -21,12 +21,12 @@ all possible lang id types
 The results will look something like this:
 
 Input String: "I am an example"
-[(0.7, 'en'); (0.15, 'fr'), (.1, 'cn') ...]
+Output: [(0.7, 'en'); (0.15, 'fr'), (.1, 'cn') ...]
 *)
 val classify: string -> Model.t -> (float * string) list
 
 (*
-Given the model predictions, sorts the model predictions according
+Given the model predictions, sort the model predictions according
 to the likelihood that the string is written in each language.
 *)
 val rank: (string * float) list -> (string * float) list
@@ -61,7 +61,7 @@ val game_choices: string -> string list -> (string * bool) list
 (*
 Score user guess vs model output  
 bools are outputs of check player and model response functions
-1 if user wins, .5 if tie, 0 if user 
+1 if user wins, 0.5 if tie, 0 if user 
 *)
 val evaluate_example: bool -> bool -> float
 

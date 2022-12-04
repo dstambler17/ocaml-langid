@@ -5,7 +5,7 @@ Lang ID library for Ocaml
 
 **1) An overview of the purpose of the project**
 
- The purpose of the project is to make an opam package for LangID, a package that currently doesn’t exist in the OCaml ecosystem. Given a string, detect what language it's written in as well as the confidence of the underlying model.  (similar to this python library: https://github.com/saffsd/langid.py) We will use this library in a command line game.
+ The purpose of the project is to make an opam package for LangID, a package that currently doesn’t exist in the OCaml ecosystem. Given a string, detect what language it's written in as well as the confidence of the underlying model.  (similar to this python library: https://github.com/saffsd/langid.py) We will use this library in a command line game that pits the user's language guessing abilities against the LangID model.
 
 **2) A list of libraries you plan on using**
 
@@ -93,10 +93,12 @@ val lines :
 1) We will first work on importing a pretrained model from a file into OCaml Torch. 
 2) We will ensure that we are able to use the model to classify text from raw input. We will extend functionality to classify multiple sentences
 3) We will work on using text coming from a file given a path, and output top_n predictions for the language of that file
-4) We will implement a LangID game for users to try to beat the model using preloaded text snippets and ground truth. 
+4) We will implement a LangID game for users to try to beat the model using preloaded text snippets and ground truth.
 
-**7) If your project is an OCaml version of some other app in another language or a projust you did in another course etc please cite this other project. In general any code that inspired your code needs to be cited in your submissions.**
+**7) If your project is an OCaml version of some other app in another language or a project you did in another course etc please cite this other project. In general any code that inspired your code needs to be cited in your submissions.**
     Our project is the OCaml version of this python LangID library: 
     https://github.com/saffsd/langid.py/tree/master/langid
 
     We are modeling our interface off of this instantiation, and thus our .mli file seeks to approximate the python version, such that users of the package can expect similar performance when using our OCaml implementation.
+    
+    The command line game is our own original idea, and just a way for us to showcase our implementation of the LangID library

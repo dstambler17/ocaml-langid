@@ -27,3 +27,9 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+.DS_Store
+*.zip
+
+#TODO: Remove later
+test_lang_id.py
