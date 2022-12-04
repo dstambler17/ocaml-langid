@@ -46,7 +46,6 @@ OVERALL USAGE
 ########################################################################
 Parameters: 
 --mode: Setting the use case mode to game or eval
---model-path: Specify a pretrained model other than the one native to our application
 --top_n: Number of predicted languages to output, defaults to 1
 --filename: path of a file to use as input for the model
 --input: raw sentence input for running the model, sentences are separated by period
@@ -82,9 +81,6 @@ The top 3 options for inferno.txt are (Italian, 82%), (Portugese, 16%), (Spanish
 
 $ ./langid.exe --filename don_quixote.txt --mode eval
 The top 3 options for don_quixote.txt are (Spanish, 96%)
-
-$ ./langid.exe --filename inferno.txt --model-path ../models/langid/really_bad_model.pt --mode eval --top_n 3
-The top 3 options for inferno.txt are (Russian, 82%), (German, 16%), (Italian, 2%)
 
 $ ./langid.exe --mode eval --top_n 3 --input como estas . le temps est agréable
 Sentence 1: (Spanish, 90%), (Portugese, 7%), (French, 3%)
