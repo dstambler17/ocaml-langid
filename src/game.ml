@@ -41,7 +41,10 @@ let check_player_response (input_idx : int) (possible_choices : (string * bool) 
 given model guess and groundtruth, check if model guessed correctly
 *)
 let check_model_response (model_output : string) (possible_choices : (string * bool) list) : bool = 
-  failwith "unimplemented"
+  List.filter possible_choices ~f:(fun (_, correct) -> if correct then true else false)
+  |> List.hd_exn
+  |> Tuple2.get1
+  |> String.(=) model_output
 (*
 Generate output based on recent event
 takes user and model correctness, as well as groundtruth, and returns a string to 
