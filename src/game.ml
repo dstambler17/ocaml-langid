@@ -4,13 +4,14 @@ open Core
 
 module M = Models
 
-
+let examples = [("hello", "en"), ("Hola mi amigo", "es")]
 (*
 Get an example and its ground truth from preloaded examples
 *)
 let pick_targets (ex_gt : (string * string) list) : (string * string) = 
-  List.hd_exn ex_gt
-
+  let idx = examples |> List.length |> Random.int in
+  List.nth_exn ex_gt idx
+  
 (*
 Define list of answers for the game setting. Given a groundtruth and all possible languages, 
 output a list of languages containing groundtruth, paired with a bool whether it is the correct answer
