@@ -83,8 +83,11 @@ nb_numfeats = int(len(nb_ptc) / len(nb_pc))
 
 # reconstruct pc and ptc
 # num feats = 7480
-nb_pc = np.array(nb_pc)
-nb_ptc = np.array(nb_ptc).reshape(nb_numfeats, len(nb_pc))
+nb_pc = np.array(nb_pc) #(97, )
+nb_ptc = np.array(nb_ptc).reshape(nb_numfeats, len(nb_pc)) #(7480, 97)
+
+import pdb
+pdb.set_trace()
 
 np.save('models/nb_pc', nb_pc, allow_pickle=False, fix_imports=False) #Save 'bias'
 np.save('models/nb_ptc', nb_ptc, allow_pickle=False, fix_imports=False) #Save 'linear layer'

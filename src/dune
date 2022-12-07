@@ -5,4 +5,14 @@
     )
    (libraries
    core
-   torch))
+   core_unix
+   core_unix.sys_unix
+   stdio
+   torch
+   owl
+   yojson)
+   (preprocess 
+   (pps 
+    bisect_ppx
+    ppx_jane
+    ppx_deriving_yojson)))
