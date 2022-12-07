@@ -8,7 +8,6 @@
    core_unix
    core_unix.sys_unix
    stdio
-   torch
    owl
    yojson)
    (preprocess 
@@ -27,8 +26,6 @@
    core_unix
    core_unix.sys_unix
    stdio
-   torch
-   owl
    models
    ))
     
