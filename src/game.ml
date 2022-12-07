@@ -1,15 +1,17 @@
 [@@@ocaml.warning "-33"]
 [@@@ocaml.warning "-27"]
-open Core
 
+open Core
 module M = Models
 
+let examples = [("hello", "en"), ("Hola mi amigo", "es")]
 
 (*
 Get an example and its ground truth from preloaded examples
 *)
 let pick_targets (ex_gt : (string * string) list) : (string * string) = 
-  List.hd_exn ex_gt
+  let idx = examples |> List.length |> Random.int in
+  List.nth_exn ex_gt idx
 
 (*
 Define list of answers for the game setting. Given a groundtruth and all possible languages, 
@@ -17,18 +19,24 @@ output a list of languages containing groundtruth, paired with a bool whether it
 *)
 let game_choices (gt : string) (langs: string list) : (string * bool) list = 
   failwith "unimplemented"
+
 (*
 Score user guess vs model output  
 bools are outputs of check player and model response functions
 1 if user wins, 0.5 if tie, 0 if user 
 *)
-let evaluate_example (user: bool) (model: bool) : float = 
-  failwith "unimplemented"
+let evaluate_example (user_correct: bool) (model_correct: bool) : float = 
+  match model_correct, user_correct with
+  | true, true -> 0.5
+  | false, true -> 1.
+  | _, false -> 0.
+
 (*
 Check if the player guessed correctly or not   
 *)
 let check_player_response (input_idx : int) (possible_choices : (string * bool) list) : bool = 
-  failwith "unimplemented"
+  input_idx |> List.nth_exn possible_choices |> Tuple2.get2
+  
 (*
 given model guess and groundtruth, check if model guessed correctly
 *)
