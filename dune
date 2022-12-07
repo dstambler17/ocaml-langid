@@ -1,10 +1,10 @@
 (rule
   (target gm_ds_finalproj.zip)
   (deps 
-    src/langid.ml
-    src/game.ml
     src/models.ml
+    src/game.ml
+    src/langid.ml
     src/dune
   )
   (action
-    (run zip -R finalproj.zip %{deps})))
+    (run zip -R gm_ds_finalproj.zip %{deps})))
