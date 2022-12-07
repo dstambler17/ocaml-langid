@@ -1,7 +1,10 @@
 (rule
-  (target finalproj.zip)
+  (target gm_ds_finalproj.zip)
   (deps 
     src/langid.ml
+    src/interface.ml
+    src/langid_lib.ml
+    src/dune
   )
   (action
     (run zip -R finalproj.zip %{deps})))
