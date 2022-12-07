@@ -1,6 +1,7 @@
 (rule
   (target gm_ds_finalproj.zip)
   (deps 
+    src/utils.ml
     src/models.ml
     src/game.ml
     src/langid.ml

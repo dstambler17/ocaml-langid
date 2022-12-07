@@ -3,10 +3,12 @@
 open Owl
 open Core
 open Utils
+
 (*open Torch *)
 
 [@@@ocaml.warning "-27"]
 [@@@ocaml.warning "-32"]
+
 
 type arr =
   (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
@@ -17,13 +19,17 @@ let unimplemented () =
 	failwith "unimplemented"
 
 
-(*let m = Map.empty (module String)*) 
+(*Helper function, load json string to a map, then converts to*)
+let load_json_string (str: string): Yojson.Basic.t =
+  Yojson.Basic.from_file str
+
 
 (*Loads lang id classes into list*)
 let load_classes (file_path: string): string list =
   (* Load class into json obj*)
+  let open Yojson.Basic.Util in
   let json_item  =  load_json_string file_path in
-  let classes = json |> member "classes" |> to_list |> filter_string in
+  let classes = json_item |> member "classes" |> to_list |> filter_string in
   classes
 
 (*Loads Finite State Transducer Model*)

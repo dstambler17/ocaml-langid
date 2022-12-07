@@ -1,4 +1,6 @@
 open Core
+[@@@ocaml.warning "-32"]
+
 
 (*TODO: Not needed, delete*)
 let read_file_input (file_path: string): string list =
@@ -7,7 +9,3 @@ let read_file_input (file_path: string): string list =
   In_channel.close file;
   strings
 
-(*Load json string to a map, then converts to*)
-let load_json_string (str: string): Yojson.Basic.t =
-  let json2 = Yojson.Basic.from_file str in
-  json2
