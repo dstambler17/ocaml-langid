@@ -1,5 +1,8 @@
+[@@@ocaml.warning "-33"]
+
+
 open Core
 open Owl
 
-module ID = Langid_lib
-module IF = Interface
+module M = Models
+module G = Game
