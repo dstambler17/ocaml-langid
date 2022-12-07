@@ -14,7 +14,6 @@ type arr =
 
 val load_model_file: string -> arr
 
-val load_json_string: string -> Yojson.Basic.t
 (* 
 Load torch model from weights. Given a string, return the ocaml torch representation of a model  
 *)

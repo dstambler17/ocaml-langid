@@ -1,20 +1,37 @@
 (library
+  (name utils)
+  (modules
+    utils
+  )
+  (libraries
+    core
+    core_unix
+    core_unix.sys_unix
+    stdio
+    yojson
+  )
+  (preprocess 
+  (pps 
+    ppx_jane
+    ppx_deriving_yojson)
+  )
+)
+
+
+(library
   (name models)
   (modules
     models
     )
    (libraries
    core
-   core_unix
-   core_unix.sys_unix
-   stdio
    owl
-   yojson)
+   utils
+   )
    (preprocess 
    (pps 
     bisect_ppx
-    ppx_jane
-    ppx_deriving_yojson)))
+   )))
 
 (library
   (name game)
@@ -27,6 +44,7 @@
    core_unix.sys_unix
    stdio
    models
+   utils
    ))
     
 

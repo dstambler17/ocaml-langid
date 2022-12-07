@@ -2,6 +2,7 @@
 
 open Owl
 open Core
+open Utils
 (*open Torch *)
 
 [@@@ocaml.warning "-27"]
@@ -15,22 +16,21 @@ type arr =
 let unimplemented () =
 	failwith "unimplemented"
 
-(*TODO: Not needed, delete*)
-let read_file_input (file_path: string): string list =
-  let file = In_channel.create file_path in
-  let strings = In_channel.input_lines file in
-  In_channel.close file;
-  strings
 
 (*let m = Map.empty (module String)*) 
 
-(*Load json string to a map, then converts to*)
-let load_json_string (str: string): Yojson.Basic.t =
-  let json2 = Yojson.Basic.from_file str in
-  json2
+(*Loads lang id classes into list*)
+let load_classes (file_path: string): string list =
+  (* Load class into json obj*)
+  let json_item  =  load_json_string file_path in
+  let classes = json |> member "classes" |> to_list |> filter_string in
+  classes
 
-(*Loads classes *)
-(*let load_classes (str: Yojson.Basic.t): =*)
+(*Loads Finite State Transducer Model*)
+let load_fst (str: Yojson.Basic.t): string list =
+  (*let json_item  =  load_json_string file_path in*)
+  unimplemented ()
+(*TODO: IMPLEMENT*)
 
 
 let load_model_file (path: string): arr =
