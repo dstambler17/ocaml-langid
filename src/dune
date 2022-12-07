@@ -1,8 +1,25 @@
 (library
   (name langid)
   (modules
-    langid
+    langid_lib
+    interface
     )
    (libraries
    core
-   torch))
+   owl))
+
+(executable
+  (name langid)
+  (modules
+    langid)
+  (preprocess
+    (pps ppx_deriving_yojson))
+  (libraries
+    core
+    core_unix
+    core_unix.sys_unix
+    stdio
+    yojson
+    ppx_deriving_yojson.runtime
+    langid_lib
+    interface))
