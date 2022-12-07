@@ -1,3 +1,5 @@
+open Core
+open Owl
 
-Open game
-Open interface
+module ID = Langid_lib
+module IF = Interface

@@ -1,4 +1,5 @@
 (*BELOW ARE THE MLI DECLARATIONS SPECIFIC FOR THE COMMAND LINE GAME*)
+(* open Core *)
 
 (*
 Get an example and its ground truth from preloaded examples
