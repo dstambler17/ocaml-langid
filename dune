@@ -3,7 +3,7 @@
   (deps 
     src/langid.ml
     src/game.ml
-    src/langid_lib.ml
+    src/models.ml
     src/dune
   )
   (action

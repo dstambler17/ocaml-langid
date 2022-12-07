@@ -1,8 +1,7 @@
 (library
-  (name langid)
+  (name models)
   (modules
-    langid_lib
-    game
+    models
     )
    (libraries
    core
@@ -17,6 +16,22 @@
     ppx_jane
     ppx_deriving_yojson)))
 
+(library
+  (name game)
+  (modules
+    game
+    )
+   (libraries
+   core
+   core_unix
+   core_unix.sys_unix
+   stdio
+   torch
+   owl
+   models
+   ))
+    
+
 (executable
   (name langid)
   (modules
@@ -30,5 +45,5 @@
     stdio
     yojson
     ppx_deriving_yojson.runtime
-    langid_lib
+    models
     game))
