@@ -2,7 +2,7 @@
   (name langid)
   (modules
     langid_lib
-    interface
+    game
     )
    (libraries
    core

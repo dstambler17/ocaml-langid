@@ -2,7 +2,7 @@
   (target gm_ds_finalproj.zip)
   (deps 
     src/langid.ml
-    src/interface.ml
+    src/game.ml
     src/langid_lib.ml
     src/dune
   )
