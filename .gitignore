@@ -33,3 +33,5 @@ _opam/
 
 #TODO: Remove later
 test_lang_id.py
+
+*.coverage
