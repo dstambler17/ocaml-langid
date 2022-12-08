@@ -3,8 +3,6 @@
 open Owl
 (*open Torch *)
 
-(*BELOW ARE THE MLI DECLARATIONS SPECIFIC FOR THE LANG ID LIBRARY*)
-
 (* 
 Load model file from path, get back a string representation of the model
 *)
@@ -30,7 +28,6 @@ type arr =
 val nb_classprobs: arr -> arr -> arr -> arr
 
 (* Return softmax to turn feature vector into probability disttribution*)
-(* TODO: Implement later *)
 val norm_probs: arr -> arr
 
 (* Return highest score from the output vector and pick idx from string list *)

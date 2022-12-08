@@ -19,6 +19,8 @@ let unimplemented () =
 	failwith "unimplemented"
 
 
+
+
 (*Helper function, load json string to a map, then converts to*)
 let load_json_string (str: string): Yojson.Basic.t =
   Yojson.Basic.from_file str
@@ -40,7 +42,7 @@ let load_fst_list (file_path: string): int list =
 
 
 (*Loads Finite State Transducer Model Map  tk_output*)
-(*TODO: Add type to return *)
+(*TODO: Add type to return once we set up functor stuff*)
 let load_fst_map (file_path: string) =
   let create_map_helper (input_list: (int * int list) list) =
     let m = Map.empty (module Int) in
@@ -57,18 +59,39 @@ let load_fst_map (file_path: string) =
     |> List.map ~f:(fun (k, v) -> (int_of_string k), v |> to_list |> filter_int)  
     |> create_map_helper
   
+  
 (* Loads .npy (numpy model) files *)
 let load_model_file (path: string): arr =
   Owl_dense_ndarray_s.load_npy path
 
 let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  = 
-  unimplemented()
+  (*TODO: Add consts file to replace magic nums*)
+  (*TODO: fill out function logic from langid. This uses bitshifts *)
+  (* Replace with zeros *)
+  let feature_vec = Owl_dense_ndarray_s.ones (List.to_array [1; 7480])
 
 let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
-  unimplemented()
+  let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
+  Owl_dense_ndarray_s.add bias
 
 let pick_highest_score (inp: arr) (classes: string list): (string * float) =
-  unimplemented()
+  (* Helper function that returns highest scoring index*)
+  let argmax (inp: arr): int =
+    score, max_arr = Owl_dense_ndarray_s.max_i inp;;
+    let max_idx = match (Array.to_list max_arr) with
+      | _, res -> res
+    in
+    score, max_idx
+  in
+
+  let score, max_idx = argmax inp in
+  let langcode_opt = classes |> List.findi ~f:(fun idx -> idx == max_idx) in
+  let langcode = 
+    match langcode_opt with 
+    | Some(_, code) -> code 
+    | None -> failwith
+  in
+  
   
 let classify (input_text: string): (float * string) list =
   unimplemented()
