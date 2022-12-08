@@ -76,7 +76,7 @@ let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
   let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
   Owl_dense_ndarray_s.add hidden_out bias
 
-let pick_highest_score (inp: arr) (classes: string list): (string * float) =
+let pick_highest_score (inp: arr) (classes: string list): (float * string) =
   (* Helper function that returns highest scoring index*)
   let argmax (inp: arr): (float * int) =
     let score, max_arr = Owl_dense_ndarray_s.max_i inp in
@@ -94,10 +94,22 @@ let pick_highest_score (inp: arr) (classes: string list): (string * float) =
     | Some(_, code) -> code 
     | None -> invalid_class_file()
   in
-  langcode, score
+  score, langcode
   
 let classify (input_text: string): (float * string) list =
-  unimplemented()
+  (*First load in all models, FSTs, and files*)
+  let classes = load_classes "models/classes_info.json" in
+  let tk_nextmove = load_fst_list  "models/fst_feature_model_info.json" in
+  let tk_output = load_fst_map  "models/fst_feature_model_info.json" in
+  let hidden_weights =  load_model_file "models/nb_ptc.npy" in
+  let hidden_bias = load_model_file "models/nb_pc.npy" in
+
+  (* convert text input to feature vector *)
+  let feature_vec  = instance2fv input_text tk_nextmove tk_output in
+  let model_outs = nb_classprobs feature_vec hidden_weights hidden_bias in
+
+  (*return a list as we will later support top k results*)
+  [pick_highest_score model_outs classes]
 
 (* TODO: Implement later *)
 let norm_probs (inp: arr): arr =

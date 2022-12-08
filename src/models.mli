@@ -31,7 +31,7 @@ val nb_classprobs: arr -> arr -> arr -> arr
 val norm_probs: arr -> arr
 
 (* Return highest score from the output vector and pick idx from string list *)
-val pick_highest_score: arr -> string list -> (string * float)
+val pick_highest_score: arr -> string list -> (float * string)
 
 (*
   Primary function 
