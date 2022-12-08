@@ -10,7 +10,7 @@ val pick_targets: (string * string) list -> (string * string)
 Define list of answers for the game setting. Given a groundtruth and all possible languages, 
 output a list of languages containing groundtruth, paired with a bool whether it is the correct answer
 *)
-val game_choices: string -> string list -> (string * bool) list
+val game_choices: string -> string list -> int -> (string * bool) list
 
 (*
 Score user guess vs model output  
@@ -39,7 +39,7 @@ val event_string: bool -> bool -> string -> string
 (*
 Pick winner based on scores at the end of the game   
 *)
-val evaluate_winner: int -> int -> bool 
+val winner_string: int -> int -> string 
 
 
 (* 
