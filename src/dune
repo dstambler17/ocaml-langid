@@ -11,7 +11,8 @@
     yojson
   )
   (preprocess 
-  (pps 
+  (pps
+    bisect_ppx 
     ppx_jane
     ppx_deriving_yojson)
   )
@@ -45,7 +46,11 @@
    stdio
    models
    utils
-   ))
+   )
+   (preprocess 
+   (pps 
+    bisect_ppx
+   )))
     
 
 (executable
