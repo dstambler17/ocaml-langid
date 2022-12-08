@@ -69,8 +69,9 @@ communicate with user
 let event_string (user_correct : bool) (model_correct : bool) (gt: string) : string = 
   match user_correct, model_correct with
   | true, true -> Printf.sprintf "You were correct, as was I! It was indeed %s\n" gt
-  | true, false -> "Ah! You got me on this one. I'll get you next time..."
-  | false, _ -> Printf.sprintf ""
+  | true, false -> "Ah! You got me on this one. I'll get you next time...\n"
+  | false, true -> Printf.sprintf "Ha! One for me, none for you! The actual answer was %s\n" gt
+  | false, false -> Printf.sprintf "Seems we're both bad at this - no points for either of us. The actual answer was %s\n" gt
   
 (*
 Pick winner based on scores at the end of the game   

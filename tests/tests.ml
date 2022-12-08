@@ -36,13 +36,20 @@ let test_evaluate_winner _ =
   assert_equal "Great game, that was a hard-fought tie. Maybe we should play again to settle the score..." @@ G.winner_string 1 1;
   assert_equal "You beat me 2-1! Are you sure you're not a computer? Good game." @@ G.winner_string 2 1
 
+let test_event_string _ = 
+  assert_equal "You were correct, as was I! It was indeed en\n" @@ G.event_string true true ex_model_out1;
+  assert_equal "Ah! You got me on this one. I'll get you next time...\n" @@ G.event_string true false ex_model_out1;
+  assert_equal "Ha! One for me, none for you! The actual answer was en\n" @@ G.event_string false true ex_model_out1;
+  assert_equal "Seems we're both bad at this - no points for either of us. The actual answer was en\n" @@ G.event_string false false ex_model_out1
+
 let game_tests = "Game" >: test_list [
   "Test Evaluate Example" >:: test_evaluate_example;
   "Test Player Response" >:: test_player_response;
   "Test Model Response" >:: test_model_response;
   "Test Evaluate Winner" >:: test_evaluate_winner;
   "Test Pick Targets" >:: test_pick_targets;
-  "Test Game Choices" >:: test_game_choices
+  "Test Game Choices" >:: test_game_choices;
+  "Test Event String" >:: test_event_string
   ]
 
 let model_tests = "Model" >: test_list [

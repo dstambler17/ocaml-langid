@@ -1,13 +1,11 @@
 [@@@ocaml.warning "-33"]
+[@@@ocaml.warning "-27"]
+[@@@ocaml.warning "-32"]
 
 open Owl
 open Core
 open Utils
 
-(*open Torch *)
-
-[@@@ocaml.warning "-27"]
-[@@@ocaml.warning "-32"]
 
 type arr = Owl_dense_ndarray_s.arr
 (*type arr =
@@ -104,6 +102,7 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
   in
   
   feature_vec
+
 
 let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
   let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
