@@ -6,9 +6,9 @@ open Owl
 (* 
 Load model file from path, get back a string representation of the model
 *)
-type arr =
-  (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
-   Stdlib.Bigarray.Genarray.t
+type arr = Owl_dense_ndarray_s.arr
+  (*(float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
+   Stdlib.Bigarray.Genarray.t *)
 
 (* 
    Convert text input to a feature vector 
