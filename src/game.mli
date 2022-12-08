@@ -50,7 +50,7 @@ Parameters:
 -top_n: Number of predicted languages to output, defaults to 1
 -filename: path of a file to use as input for the model
 -input: raw sentence input for running the model, sentences are separated by period
-$ ./langid.exe [--mode ['game', 'eval']] [--top_n TOP_N (default = 1)] [--filename FILENAME] [--input [sentences_list]] 
+$ ./langid.exe [-mode ['game', 'eval']] [-top_n TOP_N (default = 1)] [-filename FILENAME] [-input [sentences_list]] 
 
 GAME CASE
 ########################################################################
