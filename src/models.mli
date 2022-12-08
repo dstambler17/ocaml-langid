@@ -12,40 +12,51 @@ type arr =
   (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
    Stdlib.Bigarray.Genarray.t
 
-val load_model_file: string -> arr
-
 (* 
-Load torch model from weights. Given a string, return the ocaml torch representation of a model  
+   Convert text input to a feature vector 
+   Ex input : "Hi, my name is Jack"
+   Ex: output: Owl (numpy) arr item
 *)
-(*val load_model_weights: string -> Model.t*)
-
-(* 
-Given an input string and a model, call the UTF-8 encoder, and pass it through the model
-Return a probability distribution over
-all possible lang id types
-The results will look something like this:
-
-Input String: "I am an example"
-Output: [(0.7, 'en'); (0.15, 'fr'), (.1, 'cn') ...]
-*)
-(*val classify: string -> Model.t -> (float * string) list*)
+(*TODO: Figure out typing via functors then uncomment*)
+(*val instance2fv: string -> int list -> Map.t -> arr*)
 
 (*
-Given the model predictions, sort the model predictions according
-to the likelihood that the string is written in each language.
+   Passes the feature vector through the model
+   Inputs: feature vector
+           model weights
+           model bias
+   Outputs: raw prediction matrix
 *)
-(*TODO: UNCOMMENT WHEN DONE*)
-(*val rank: (string * float) list -> (string * float) list
+val nb_classprobs: arr -> arr -> arr -> arr
+
+(* Return softmax to turn feature vector into probability disttribution*)
+(* TODO: Implement later *)
+val norm_probs: arr -> arr
+
+(* Return highest score from the output vector and pick idx from string list *)
+val pick_highest_score: arr -> string list -> (string * float)
 
 (*
-Map an instance into the feature space of the trained model.
+  Primary function 
+  Given an input string and a model, call the UTF-8 encoder, and pass it through the model
+  Return a probability distribution over
+  all possible lang id types
+  The results will look something like this:
+
+  Input String: "I am an example"
+  Output: [(0.7, 'en'); (0.15, 'fr'), (.1, 'cn') ...]
 *)
-val instance2fv: string -> Model.t -> 'a list
+val classify: string -> (float * string) list
 
 (*
-Given input sentence, model, and top_N, output model likelihoods
-and return the top n results
-Calls the rank and classify methods   
+  Given the model predictions, sort the model predictions according
+  to the likelihood that the string is written in each language.
 *)
-val top_choices: string -> Model.t -> int -> (string * float) list
+val rank: (string * float) list -> (string * float) list
+
+(*
+  Given input sentence, model, and top_N, output model likelihoods
+  and return the top n results
+  Calls the rank and classify methods   
 *)
+val top_choices: string -> int -> (string * float) list
