@@ -1,13 +1,11 @@
 [@@@ocaml.warning "-33"]
+[@@@ocaml.warning "-27"]
+[@@@ocaml.warning "-32"]
 
 open Owl
 open Core
 open Utils
 
-(*open Torch *)
-
-[@@@ocaml.warning "-27"]
-[@@@ocaml.warning "-32"]
 
 
 type arr =
@@ -17,8 +15,6 @@ type arr =
 
 let unimplemented () =
 	failwith "unimplemented"
-
-
 
 
 (*Helper function, load json string to a map, then converts to*)
@@ -69,6 +65,7 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
   (*TODO: fill out function logic from langid. This uses bitshifts *)
   (* Replace with zeros *)
   let feature_vec = Owl_dense_ndarray_s.ones (List.to_array [1; 7480])
+
 
 let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
   let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
