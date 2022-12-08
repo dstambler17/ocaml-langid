@@ -6,9 +6,9 @@ open Owl
 (* 
 Load model file from path, get back a string representation of the model
 *)
-type arr =
-  (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
-   Stdlib.Bigarray.Genarray.t
+type arr = Owl_dense_ndarray_s.arr
+  (*(float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
+   Stdlib.Bigarray.Genarray.t *)
 
 (* 
    Convert text input to a feature vector 
@@ -31,7 +31,7 @@ val nb_classprobs: arr -> arr -> arr -> arr
 val norm_probs: arr -> arr
 
 (* Return highest score from the output vector and pick idx from string list *)
-val pick_highest_score: arr -> string list -> (string * float)
+val pick_highest_score: arr -> string list -> (float * string)
 
 (*
   Primary function 

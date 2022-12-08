@@ -7,15 +7,18 @@ open Core
 open Utils
 
 
-
-type arr =
+type arr = Owl_dense_ndarray_s.arr
+(*type arr =
   (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
-   Stdlib.Bigarray.Genarray.t
+   Stdlib.Bigarray.Genarray.t*)
 
 
 let unimplemented () =
 	failwith "unimplemented"
 
+let invalid_class_file () =
+  failwith "Out of bounds class file. Should never get here unless you switched out the files"
+  
 
 (*Helper function, load json string to a map, then converts to*)
 let load_json_string (str: string): Yojson.Basic.t =
@@ -64,34 +67,48 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
   (*TODO: Add consts file to replace magic nums*)
   (*TODO: fill out function logic from langid. This uses bitshifts *)
   (* Replace with zeros *)
-  let feature_vec = Owl_dense_ndarray_s.ones (List.to_array [1; 7480])
+  let feature_vec = Owl_dense_ndarray_s.ones (List.to_array [1; 7480]) in
+  feature_vec
 
 
 let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
   let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
-  Owl_dense_ndarray_s.add bias
+  Owl_dense_ndarray_s.add hidden_out bias
 
-let pick_highest_score (inp: arr) (classes: string list): (string * float) =
+let pick_highest_score (inp: arr) (classes: string list): (float * string) =
   (* Helper function that returns highest scoring index*)
-  let argmax (inp: arr): int =
-    score, max_arr = Owl_dense_ndarray_s.max_i inp;;
+  let argmax (inp: arr): (float * int) =
+    let score, max_arr = Owl_dense_ndarray_s.max_i inp in
     let max_idx = match (Array.to_list max_arr) with
-      | _, res -> res
+      | _::res::[] -> res
+      | _ -> failwith "Should not be reached"
     in
     score, max_idx
   in
 
   let score, max_idx = argmax inp in
-  let langcode_opt = classes |> List.findi ~f:(fun idx -> idx == max_idx) in
+  let langcode_opt = classes |> List.findi ~f:(fun idx _ -> idx = max_idx) in
   let langcode = 
     match langcode_opt with 
     | Some(_, code) -> code 
-    | None -> failwith
+    | None -> invalid_class_file()
   in
-  
+  score, langcode
   
 let classify (input_text: string): (float * string) list =
-  unimplemented()
+  (*First load in all models, FSTs, and files*)
+  let classes = load_classes "models/classes_info.json" in
+  let tk_nextmove = load_fst_list  "models/fst_feature_model_info.json" in
+  let tk_output = load_fst_map  "models/fst_feature_model_info.json" in
+  let hidden_weights =  load_model_file "models/nb_ptc.npy" in
+  let hidden_bias = load_model_file "models/nb_pc.npy" in
+
+  (* convert text input to feature vector *)
+  let feature_vec  = instance2fv input_text tk_nextmove tk_output in
+  let model_outs = nb_classprobs feature_vec hidden_weights hidden_bias in
+
+  (*return a list as we will later support top k results*)
+  [pick_highest_score model_outs classes]
 
 (* TODO: Implement later *)
 let norm_probs (inp: arr): arr =
