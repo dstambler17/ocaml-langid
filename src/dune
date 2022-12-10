@@ -28,6 +28,7 @@
    core
    owl
    utils
+   camomile
    )
    (preprocess 
    (pps 

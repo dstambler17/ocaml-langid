@@ -6,6 +6,9 @@
     src/game.ml
     src/langid.ml
     src/dune
+    tests/tests.ml
+    tests/dune
+    dune
   )
   (action
     (run zip -R gm_ds_finalproj.zip %{deps})))
