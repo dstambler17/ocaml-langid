@@ -6,8 +6,10 @@ open Owl
 open Core
 open Utils
 
+module O = Owl_dense_ndarray_s
 
-type arr = Owl_dense_ndarray_s.arr
+
+type arr = O.arr
 (*type arr =
   (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
    Stdlib.Bigarray.Genarray.t*)
@@ -61,14 +63,14 @@ let load_fst_map (file_path: string) =
   
 (* Loads .npy (numpy model) files *)
 let load_model_file (path: string): arr =
-  Owl_dense_ndarray_s.load_npy path
+  O.load_npy path
 
 let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  = 
   (*TODO: Add consts file to replace magic nums*)
   (*TODO: Need to encode special char to utf8 for this to work*)
   (*TODO: Double check this or mat mul funcs for bug causing every prediction to be de *)
 
-  let feature_vec = Owl_dense_ndarray_s.zeros (List.to_array [1; 7480]) in
+  let feature_vec = O.zeros (List.to_array [1; 7480]) in
   let state_count = Map.empty (module Int) in
   let state_map, _ = input |> String.fold 
     ~f:(fun (state_count_map, state) letter ->
@@ -105,8 +107,8 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
               | Some(v) -> v
               | None -> 0
             in
-            let cur_val = Owl_dense_ndarray_s.get fv_sub (List.to_array [0; cur_count]) in
-            let _ = Owl_dense_ndarray_s.set fv_sub (List.to_array [0; cur_count]) (cur_val +. 1.) in
+            let cur_val = O.get fv_sub (List.to_array [0; cur_count]) in
+            let _ = O.set fv_sub (List.to_array [0; cur_count]) (cur_val +. 1.) in
             fv_sub
           )
           ~init:(fv)
@@ -120,13 +122,13 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
 
 
 let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
-  let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
-  Owl_dense_ndarray_s.add hidden_out bias 
+  let hidden_out = O.dot fv hidden in 
+  O.add hidden_out bias 
 
 let pick_highest_score (inp: arr) (classes: string list): (float * string) =
   (* Helper function that returns highest scoring index*)
   let argmax (inp: arr): (float * int) =
-    let score, max_arr = Owl_dense_ndarray_s.max_i inp in
+    let score, max_arr = O.max_i inp in
     let max_idx = match (Array.to_list max_arr) with
       | _::res::[] -> res
       | _ -> failwith "Should not be reached"
