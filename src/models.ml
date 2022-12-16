@@ -51,7 +51,7 @@ let load_fst_map (file_path: string) =
   in
   
   let open Yojson.Basic.Util in
-  let json_item  =  load_json_string file_path in
+  let json_item = load_json_string file_path in
   json_item 
     |> member "tk_output"
     |> to_assoc
@@ -65,23 +65,13 @@ let load_model_file (path: string): arr =
 
 let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  = 
   (*TODO: Add consts file to replace magic nums*)
-  (*TODO: Need to encode special char to utf8 for this to work*)
-  (*TODO: Double check this or mat mul funcs for bug causing every prediction to be de *)
-
+  (*TODO: fill out function logic from langid. This uses bitshifts *)
+  (* TODO: Replace with zeros when done*)
   let feature_vec = Owl_dense_ndarray_s.zeros (List.to_array [1; 7480]) in
   let state_count = Map.empty (module Int) in
   let state_map, _ = input |> String.fold 
     ~f:(fun (state_count_map, state) letter ->
-        let state_look_up = (Int.shift_left state 8) + (CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) ) in
-        
-        let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
-        
-        let cur_state = 
-          match cur_state_opt with 
-          | Some(_, num) -> num 
-          | None -> invalid_class_file() (*should not get here*)
-        in
-
+        let cur_state = (Int.shift_left state 8) + (int_of_char letter) in
         let cur_count = match Map.find state_count_map cur_state with
           | Some(v) -> v 
           | None -> 0
@@ -93,27 +83,22 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
   (*Now update the feature vector from the compiled state info*)
   (*This returns unit*)
   let state_map_two = state_map in
-  let feature_vec = (Map.keys state_map) |> List.fold
-      ~f:(fun fv state -> 
+  let _ = (Map.keys state_map) |> List.map
+      ~f:(fun acc state -> 
         let sub_states_list = match (Map.find tk_output state) with
           | Some(list_item) -> list_item
           | None -> []
         in
-        let new_fv = sub_states_list |> List.fold 
-          ~f:(fun fv_sub index -> 
+        sub_states_list |> List.map 
+          ~f:(fun index -> 
             let cur_count = match (Map.find state_map_two state) with
               | Some(v) -> v
               | None -> 0
             in
-            let cur_val = Owl_dense_ndarray_s.get fv_sub (List.to_array [0; cur_count]) in
-            let _ = Owl_dense_ndarray_s.set fv_sub (List.to_array [0; cur_count]) (cur_val +. 1.) in
-            fv_sub
+            let cur_val = Owl_dense_ndarray_s.get feature_vec (List.to_array [0; cur_count]) in
+            Owl_dense_ndarray_s.set feature_vec (List.to_array [0; cur_count]) (cur_val +. 1.) 
           )
-          ~init:(fv)
-        in
-        new_fv
       )
-      ~init:(feature_vec)
   in
   
   feature_vec
@@ -121,7 +106,7 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
 
 let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
   let hidden_out = Owl_dense_ndarray_s.dot fv hidden in 
-  Owl_dense_ndarray_s.add hidden_out bias 
+  Owl_dense_ndarray_s.add hidden_out bias
 
 let pick_highest_score (inp: arr) (classes: string list): (float * string) =
   (* Helper function that returns highest scoring index*)
