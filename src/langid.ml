@@ -40,7 +40,7 @@ let main () =
     | _ -> ""
   in
   let n = CLI.get_int_def [ "-top_n" ] args 1 in
-  let help = CLI.get_set_bool [ "-h" ; "-help"] args in
+  let help = CLI.get_set_bool [ "-h"; "-help" ] args in
   CLI.finalize ();
   match help with
   | true ->
@@ -49,6 +49,4 @@ let main () =
   | false -> ()
 
 let run_game () = main ()
-
-
 let () = main ()
