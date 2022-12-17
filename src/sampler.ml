@@ -12,13 +12,10 @@ open Cohttp_lwt_unix
 let get_body_helper url_str=
   Client.get (Uri.of_string url_str) 
     >>= fun (resp, body) ->  
-      let code = resp 
+      let _ = resp 
         |> Response.status 
         |> Code.code_of_status in  
-        Printf.printf "Response code: %d\n" code;
-        Printf.printf "Headers: %s\n" (resp |> Response.headers |> Header.to_string);
         body |> Cohttp_lwt.Body.to_string >|= fun body -> 
-        Printf.printf "Body of length: %d\n" (String.length body);
         body
 
 let get_html_body (url: string): string =
