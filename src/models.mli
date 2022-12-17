@@ -1,6 +1,7 @@
 [@@@ocaml.warning "-33"]
 
 open Owl
+open Core
 (*open Torch *)
 
 (* 
@@ -15,8 +16,7 @@ type arr = Owl_dense_ndarray_s.arr
    Ex input : "Hi, my name is Jack"
    Ex: output: Owl (numpy) arr item
 *)
-(*TODO: Figure out typing via functors then uncomment*)
-(*val instance2fv: string -> int list -> Map.t -> arr*)
+val instance2fv: string -> int list -> (int, int list, 'a) Map.t  -> arr
 
 (*
    Passes the feature vector through the model
