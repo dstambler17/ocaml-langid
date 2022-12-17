@@ -8,41 +8,40 @@ open Utils
 
 
 type arr = Owl_dense_ndarray_s.arr
-(*type arr =
-  (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
-   Stdlib.Bigarray.Genarray.t*)
-
 
 let unimplemented () =
 	failwith "unimplemented"
 
 let invalid_class_file () =
-  failwith "Out of bounds class file. Should never get here unless you switched out the files"
-  
+  failwith "Invalid class file. Should never get here unless the model files were changed or tampered with"
 
-(*Helper function, load json string to a map, then converts to*)
+(* Define Consts *)
+let num_features () =
+  7480
+
+let num_classes () =
+  97
+
+(*Helper function, load json string to a map, then converts to json *)
 let load_json_string (str: string): Yojson.Basic.t =
   Yojson.Basic.from_file str
 
 (* The following five functions deal with loading all model/class info *)
 
-(*Loads lang id classes into list *)
+(*Loads lang id classes into list, but first Load class into json obj. *)
 let load_classes (file_path: string): string list =
-  (* Load class into json obj*)
   let open Yojson.Basic.Util in
   let json_item  =  load_json_string file_path in
   json_item |> member "classes" |> to_list |> filter_string
 
-(* Loads Finite State Transducer Model List called tk_nextmove*)
+(* Loads Finite State Transducer Model List called 'tk_nextmove' *)
 let load_fst_list (file_path: string): int list =
   let open Yojson.Basic.Util in
   let json_item  =  load_json_string file_path in
   json_item |> member "tk_nextmove" |> to_list |> filter_int
 
-
 (*Loads Finite State Transducer Model Map  tk_output*)
-(*TODO: Add type to return once we set up functor stuff*)
-let load_fst_map (file_path: string) =
+let load_fst_map (file_path: string): (int, int list, 'a) Map.t =
   let create_map_helper (input_list: (int * int list) list) =
     let m = Map.empty (module Int) in
     input_list |> List.fold 
@@ -63,39 +62,41 @@ let load_fst_map (file_path: string) =
 let load_model_file (path: string): arr =
   Owl_dense_ndarray_s.load_npy path
 
-let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output): arr  = 
-  (*TODO: Add consts file to replace magic nums*)
-  (*TODO: Need to encode special char to utf8 for this to work*)
-  (*TODO: Double check this or mat mul funcs for bug causing every prediction to be de *)
 
-  let feature_vec = Owl_dense_ndarray_s.zeros (List.to_array [1; 7480]) in
+(* HELPER FUNCTIONS FOR TURNING INPUT TO FEATURE VECTOR *)
+
+(* 
+   Get a map of states and counts from input text. States come from
+   this formula: state = tk_nextmove[(state << 8) + letter]  
+   Where tk_nextmove is an array representation of some Finite State Machine
+*)
+let get_state_count_map (input_str: string) (tk_nextmove: int list): (int, int, 'a) Map.t  =
   let state_count = Map.empty (module Int) in
   let state_map, _ = input_str |> String.fold 
-    ~f:(fun (state_count_map, state) letter ->
-        let state_look_up = (Int.shift_left state 8) + int_of_char letter (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*) in
-        
-        let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
-        
-        let cur_state = 
-          match cur_state_opt with 
-          | Some(_, num) -> num 
-          | None -> invalid_class_file() (*should not get here*)
-        in
+  ~f:(fun (state_count_map, state) letter ->
+      let state_look_up = (Int.shift_left state 8) + int_of_char letter (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*) in
+      
+      let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
+      
+      let cur_state = 
+        match cur_state_opt with 
+        | Some(_, num) -> num 
+        | None -> invalid_class_file() (* Should not be reachable if model files were not tampered with *)
+      in
 
-        let cur_count = match Map.find state_count_map cur_state with
-          | Some(v) -> v 
-          | None -> 0
-        in
-       (Map.set state_count_map ~key:cur_state ~data:(cur_count + 1)), cur_state
-      )
-    ~init:(state_count, 0)
+      let cur_count = match Map.find state_count_map cur_state with
+        | Some(v) -> v 
+        | None -> 0
+      in
+     (Map.set state_count_map ~key:cur_state ~data:(cur_count + 1)), cur_state
+    )
+  ~init:(state_count, 0)
   in
-  (*Now update the feature vector from the compiled state info*)
-  (*This returns unit*)
-  let state_map_two = state_map in
-  
-  (*Get list of indicies to update*)
-  let index_count_tuple_list = (Map.keys state_map) |> List.fold
+  state_map
+
+(* Get a tuple list of indicies to update in feature vec and value to set these indicies to *)
+let get_index_count_list (state_map) (tk_output: (int, int list, 'a) Map.t ): (int * int) list =
+  (Map.keys state_map) |> List.fold
       ~f:(fun idx_list state -> 
         let index_sub_list = match (Map.find tk_output state) with
           | Some(list_item) -> list_item
@@ -103,18 +104,28 @@ let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output): arr  =
         in
         let tuple_list = index_sub_list |> List.map
           ~f:(fun cur_index -> 
-            let cur_val_count = match (Map.find state_map_two state) with
+            let cur_val_count = match (Map.find state_map state) with
               | Some(v) -> v
               | None -> 0
             in
             (cur_index, cur_val_count))
         in
-        tuple_list @ idx_list (* TODO: MAYBE REPLACE LATER *)
+        List.unordered_append idx_list tuple_list 
       )
       ~init:([])
-  in
 
-  (* Update the right feature vector indicies *)    
+
+let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output: (int, int list, 'a) Map.t ): arr  = 
+  (* Init the feature vector to be an Owl array of zeros *)  
+  let feature_vec = Owl_dense_ndarray_s.zeros (List.to_array [1; num_features ()]) in
+  
+  (* Get all states and number of times states were hit *)
+  let state_map = get_state_count_map input_str tk_nextmove in
+  
+  (*Get list of indicies to update and values to set indicies to *)
+  let index_count_tuple_list = get_index_count_list state_map tk_output in
+
+  (* Update the feature vector indicies. NOTE: mutation is needed here *)    
   let _ = index_count_tuple_list |> List.iter 
       ~f:(fun (idx, count_val) -> 
         let cur_val = Owl_dense_ndarray_s.get feature_vec (List.to_array [0; idx]) in
