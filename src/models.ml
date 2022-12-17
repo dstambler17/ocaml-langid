@@ -189,6 +189,7 @@ let norm_probs (inp: arr): arr =
 let rank (inp: (string * float) list): (string * float) list =
   unimplemented()
 
+(*Note added this to resolve merge*)
 let top_choices (input_text: string) (k_choices: int): (string * float) list = 
   unimplemented()
 (* let top_choices (input_text: string) (k_choices: int): (string * float) list = 
