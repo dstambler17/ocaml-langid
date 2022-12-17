@@ -20,4 +20,4 @@ val get_html_body: string -> string
     the above functions
     Params: url, Random module
 *)
-val sample_sentence: string -> (module Randomness) -> string 
+val sample_sentence: string -> (module Randomness) -> string option
