@@ -72,7 +72,7 @@ let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output): arr  =
   let state_count = Map.empty (module Int) in
   let state_map, _ = input_str |> String.fold 
     ~f:(fun (state_count_map, state) letter ->
-        let state_look_up = (Int.shift_left state 8) + (CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) ) in
+        let state_look_up = (Int.shift_left state 8) + int_of_char letter (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*) in
         
         let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
         
