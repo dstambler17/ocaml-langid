@@ -1,31 +1,38 @@
 [@@@ocaml.warning "-33"]
 [@@@ocaml.warning "-32"]
-open Core
+[@@@ocaml.warning "-26"]
 
+open Core
 module M = Models
 module G = Game
+module CLI = Minicli.CLI
 
+let arguments_print = Printf.printf
+"\nArguments:\n\
+\t-mode:\n\
+\t\tgame - play a langid guessing game against the model\n\
+\t\teval - classify a string of text\n\
+\t-top_n:\n\
+\t\tnumber of predicted languages to output\n\
+\t-input;-i:\n\
+\t\tstring to be classified if eval mode is used\n\n%!"
 
-(* default values *)
-let mode = ref ""
-let top_n = ref 0
-let usage = "usage: langid [-mode ['game' or 'eval']] [-top_n int (default = 1)]"
+let example_print = Printf.printf "\nExample usage:\n\t./langid.exe -mode <string> -top_n <int> -input <string> [-h;-help]\n\n%!"
 
-(* from http://rosettacode.org/wiki/Command-line_arguments#OCaml *)
-let speclist = [
-    ("-mode", Arg.String (fun s -> mode := s), ": option to play the game or evaluate text");
-    ("-top_n", Arg.Int    (fun n -> top_n := n), ": number of language options in output");
-  ]
-
-(* let parseinput userinp =
-  (* Read the arguments *)
-  Printf.printf "String:%s\n" (Array.get userinp 2);
-  Arg.parse_argv ?current:(Some (ref 0)) userinp
-    speclist
-    (fun x -> raise (Arg.Bad ("Bad argument : " ^ x)))
-    usage;
-  Printf.printf "Set stuff to:   %d '%s'\n%!"  !top_n !mode 
-  Main functionality here *)
-
-let _ =
-  Printf.printf "We're workin' on it! :)"
+let main () =
+  let argc, args = CLI.init () in
+  if argc = 1 then (
+    example_print;
+    arguments_print;
+    exit 1);
+  let mode = CLI.get_string_def [ "-mode" ] args "eval" in
+  let input_text = match mode with
+  | "eval" -> CLI.get_string_def ["-input";"-i"] args ""
+  | _ -> "" in
+  let n = CLI.get_int_def [ "-top_n" ] args 1 in
+  let help = CLI.get_set_bool [ "-h" ] args in
+  CLI.finalize ();
+  match help with 
+  | true -> (example_print; arguments_print)
+  | false -> ()
+let () = main ()
