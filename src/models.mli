@@ -30,9 +30,6 @@ val nb_classprobs: arr -> arr -> arr -> arr
 (* Return softmax to turn feature vector into probability disttribution*)
 val norm_probs: arr -> arr
 
-(* Return highest score from the output vector and pick idx from string list *)
-val pick_highest_score: arr -> string list -> (float * string)
-
 (*
   Primary function 
   Given an input string and a model, call the UTF-8 encoder, and pass it through the model
