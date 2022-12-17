@@ -146,10 +146,6 @@ let run_model (input_text: string) : arr =
   let feature_vec  = instance2fv input_text tk_nextmove tk_output in
   nb_classprobs feature_vec hidden_weights hidden_bias
 
-let classify (input_text: string): (float * string) list =
-  top_choices input_text 1
-
-(* TODO: Implement later *)
 let norm_probs (inp: arr): arr =
   O.softmax inp
 
@@ -171,3 +167,6 @@ let top_choices (input_text: string) (k_choices: int): (string * float) list =
   |> List.zip_exn (load_classes "models/classes_info.json")
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
+
+let classify (input_text: string): (string * float) list =
+  top_choices input_text 1
