@@ -64,18 +64,6 @@ let load_fst_map (file_path: string): (int, int list, 'a) Map.t =
 let load_model_file (path: string): arr =
   O.load_npy path
 
-let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output): arr  = 
-  (*TODO: Add consts file to replace magic nums*)
-  (*TODO: Need to encode special char to utf8 for this to work*)
-  (*TODO: Double check this or mat mul funcs for bug causing every prediction to be de *)
-
-(* 
-   Get a map of states and counts from input text. States come from
-   this formula: state = tk_nextmove[(state << 8) + letter]  
-   Where tk_nextmove is an array representation of some Finite State Machine
-*)
-  unimplemented()
-
 let get_state_count_map (input_str: string) (tk_nextmove: int list): (int, int, 'a) Map.t  =
   let state_count = Map.empty (module Int) in
   let state_map, _ = input_str |> String.fold 
@@ -186,17 +174,21 @@ let classify (input_text: string): (float * string) list =
 let norm_probs (inp: arr): arr =
   O.softmax inp
 
-let rank (inp: (string * float) list): (string * float) list =
-  unimplemented()
+let owl_1d_array_to_list (a: arr): 'a list = 
+  O.shape a 
+  |> Fn.flip Array.get 1
+  |> List.init ~f:(fun x -> x)
+  |> List.fold ~f:(fun acc x -> (O.get a [|0;x|])::acc) ~init:([])
 
-(*Note added this to resolve merge*)
+let rank (inp: (string * float) list): (string * float) list =
+  List.sort ~compare:(fun (_, x1) (_, x2) -> Float.compare x2 x1) inp
+  
 let top_choices (input_text: string) (k_choices: int): (string * float) list = 
-  unimplemented()
-(* let top_choices (input_text: string) (k_choices: int): (string * float) list = 
   input_text
   |> run_model
-  |> O.tolist
-  |> List.zip (load_classes "models/classes_info.json")
+  |> norm_probs
+  |> owl_1d_array_to_list
+  |> List.rev
+  |> List.zip_exn (load_classes "models/classes_info.json")
   |> rank
-  |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false) *)
-
+  |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
