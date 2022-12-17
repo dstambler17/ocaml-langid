@@ -7,17 +7,9 @@ open Core
 open Utils
 
 module O = Owl_dense_ndarray_s
-
-<<<<<<< HEAD
+module U = Owl_utils_array
 
 type arr = O.arr
-(*type arr =
-  (float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
-   Stdlib.Bigarray.Genarray.t*)
-
-=======
-type arr = Owl_dense_ndarray_s.arr
->>>>>>> 9e7ad3455881be374bd65cf6b6e06dac7ebb5a6d
 
 let unimplemented () =
 	failwith "unimplemented"
@@ -72,31 +64,31 @@ let load_fst_map (file_path: string): (int, int list, 'a) Map.t =
 let load_model_file (path: string): arr =
   O.load_npy path
 
-
-<<<<<<< HEAD
-  let feature_vec = O.zeros (List.to_array [1; 7480]) in
-=======
-(* HELPER FUNCTIONS FOR TURNING INPUT TO FEATURE VECTOR *)
+let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output): arr  = 
+  (*TODO: Add consts file to replace magic nums*)
+  (*TODO: Need to encode special char to utf8 for this to work*)
+  (*TODO: Double check this or mat mul funcs for bug causing every prediction to be de *)
 
 (* 
    Get a map of states and counts from input text. States come from
    this formula: state = tk_nextmove[(state << 8) + letter]  
    Where tk_nextmove is an array representation of some Finite State Machine
 *)
+  unimplemented()
+
 let get_state_count_map (input_str: string) (tk_nextmove: int list): (int, int, 'a) Map.t  =
->>>>>>> 9e7ad3455881be374bd65cf6b6e06dac7ebb5a6d
   let state_count = Map.empty (module Int) in
   let state_map, _ = input_str |> String.fold 
-  ~f:(fun (state_count_map, state) letter ->
-      let state_look_up = (Int.shift_left state 8) + int_of_char letter (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*) in
-      
-      let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
-      
-      let cur_state = 
-        match cur_state_opt with 
-        | Some(_, num) -> num 
-        | None -> invalid_class_file() (* Should not be reachable if model files were not tampered with *)
-      in
+    ~f:(fun (state_count_map, state) letter ->
+        let state_look_up = (Int.shift_left state 8) + int_of_char letter (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*) in
+        
+        let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
+        
+        let cur_state = 
+          match cur_state_opt with 
+          | Some(_, num) -> num 
+          | None -> invalid_class_file() (*should not get here*)
+        in
 
       let cur_count = match Map.find state_count_map cur_state with
         | Some(v) -> v 
@@ -131,7 +123,7 @@ let get_index_count_list (state_map) (tk_output: (int, int list, 'a) Map.t ): (i
 
 let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output: (int, int list, 'a) Map.t ): arr  = 
   (* Init the feature vector to be an Owl array of zeros *)  
-  let feature_vec = Owl_dense_ndarray_s.zeros (List.to_array [1; num_features ()]) in
+  let feature_vec = O.zeros (List.to_array [1; num_features ()]) in
   
   (* Get all states and number of times states were hit *)
   let state_map = get_state_count_map input_str tk_nextmove in
@@ -142,8 +134,8 @@ let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output: (int, in
   (* Update the feature vector indicies. NOTE: mutation is needed here *)    
   let _ = index_count_tuple_list |> List.iter 
       ~f:(fun (idx, count_val) -> 
-        let cur_val = Owl_dense_ndarray_s.get feature_vec (List.to_array [0; idx]) in
-        let _ = Owl_dense_ndarray_s.set feature_vec (List.to_array [0; idx]) (cur_val +. float_of_int count_val) in
+        let cur_val = O.get feature_vec (List.to_array [0; idx]) in
+        let _ = O.set feature_vec (List.to_array [0; idx]) (cur_val +. float_of_int count_val) in
         ()
       )
   in
@@ -173,10 +165,9 @@ let pick_highest_score (inp: arr) (classes: string list): (float * string) =
     | None -> invalid_class_file()
   in
   score, langcode
-  
-let classify (input_text: string): (float * string) list =
-  (*First load in all models, FSTs, and files*)
-  let classes = load_classes "models/classes_info.json" in
+
+let run_model (input_text: string) : arr =
+  (*load in all models, FSTs, and files*)
   let tk_nextmove = load_fst_list  "models/fst_feature_model_info.json" in
   let tk_output = load_fst_map  "models/fst_feature_model_info.json" in
   let hidden_weights =  load_model_file "models/nb_ptc.npy" in
@@ -184,10 +175,12 @@ let classify (input_text: string): (float * string) list =
 
   (* convert text input to feature vector *)
   let feature_vec  = instance2fv input_text tk_nextmove tk_output in
-  let model_outs = nb_classprobs feature_vec hidden_weights hidden_bias in
+  nb_classprobs feature_vec hidden_weights hidden_bias
 
-  (*return a list as we will later support top k results*)
-  [pick_highest_score model_outs classes]
+let classify (input_text: string): (float * string) list =
+  let classes = load_classes "models/classes_info.json" in
+  let model_output = run_model input_text in
+  [pick_highest_score model_output classes]
 
 (* TODO: Implement later *)
 let norm_probs (inp: arr): arr =
@@ -196,5 +189,13 @@ let norm_probs (inp: arr): arr =
 let rank (inp: (string * float) list): (string * float) list =
   unimplemented()
 
-let top_choices (inp: string) (k_choices: int): (string * float) list = 
+let top_choices (input_text: string) (k_choices: int): (string * float) list = 
   unimplemented()
+(* let top_choices (input_text: string) (k_choices: int): (string * float) list = 
+  input_text
+  |> run_model
+  |> O.tolist
+  |> List.zip (load_classes "models/classes_info.json")
+  |> rank
+  |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false) *)
+
