@@ -102,3 +102,10 @@ val lines :
     We are modeling our interface off of this instantiation, and thus our .mli file seeks to approximate the python version, such that users of the package can expect similar performance when using our OCaml implementation.
     
     The command line game is our own original idea, and just a way for us to showcase our implementation of the LangID library
+
+
+# Install Instructions
+1) opam install cohttp-lwt-unix cohttp-async
+2) brew install openssl
+   1) Then follow the export instructions
+3) opam install lwt_ssl
