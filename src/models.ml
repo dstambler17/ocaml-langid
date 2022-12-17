@@ -134,25 +134,6 @@ let nb_classprobs (fv: arr) (hidden: arr) (bias: arr): arr =
   let hidden_out = O.dot fv hidden in 
   O.add hidden_out bias 
 
-let pick_highest_score (inp: arr) (classes: string list): (float * string) =
-  (* Helper function that returns highest scoring index*)
-  let argmax (inp: arr): (float * int) =
-    let score, max_arr = O.max_i inp in
-    let max_idx = match (Array.to_list max_arr) with
-      | _::res::[] -> res
-      | _ -> failwith "Should not be reached"
-    in
-    score, max_idx
-  in
-
-  let score, max_idx = argmax inp in
-  let langcode_opt = classes |> List.findi ~f:(fun idx _ -> idx = max_idx) in
-  let langcode = 
-    match langcode_opt with 
-    | Some(_, code) -> code 
-    | None -> invalid_class_file()
-  in
-  score, langcode
 
 let run_model (input_text: string) : arr =
   (*load in all models, FSTs, and files*)
@@ -166,9 +147,7 @@ let run_model (input_text: string) : arr =
   nb_classprobs feature_vec hidden_weights hidden_bias
 
 let classify (input_text: string): (float * string) list =
-  let classes = load_classes "models/classes_info.json" in
-  let model_output = run_model input_text in
-  [pick_highest_score model_output classes]
+  top_choices input_text 1
 
 (* TODO: Implement later *)
 let norm_probs (inp: arr): arr =
