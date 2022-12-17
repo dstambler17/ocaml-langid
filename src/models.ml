@@ -65,14 +65,14 @@ let load_fst_map (file_path: string) =
 let load_model_file (path: string): arr =
   O.load_npy path
 
-let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  = 
+let instance2fv (input_str: string) (tk_nextmove: int list) (tk_output): arr  = 
   (*TODO: Add consts file to replace magic nums*)
   (*TODO: Need to encode special char to utf8 for this to work*)
   (*TODO: Double check this or mat mul funcs for bug causing every prediction to be de *)
 
   let feature_vec = O.zeros (List.to_array [1; 7480]) in
   let state_count = Map.empty (module Int) in
-  let state_map, _ = input |> String.fold 
+  let state_map, _ = input_str |> String.fold 
     ~f:(fun (state_count_map, state) letter ->
         let state_look_up = (Int.shift_left state 8) + (CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) ) in
         
@@ -95,29 +95,35 @@ let instance2fv (input: string) (tk_nextmove: int list) (tk_output): arr  =
   (*Now update the feature vector from the compiled state info*)
   (*This returns unit*)
   let state_map_two = state_map in
-  let feature_vec = (Map.keys state_map) |> List.fold
-      ~f:(fun fv state -> 
-        let sub_states_list = match (Map.find tk_output state) with
+  
+  (*Get list of indicies to update*)
+  let index_count_tuple_list = (Map.keys state_map) |> List.fold
+      ~f:(fun idx_list state -> 
+        let index_sub_list = match (Map.find tk_output state) with
           | Some(list_item) -> list_item
           | None -> []
         in
-        let new_fv = sub_states_list |> List.fold 
-          ~f:(fun fv_sub index -> 
-            let cur_count = match (Map.find state_map_two state) with
+        let tuple_list = index_sub_list |> List.map
+          ~f:(fun cur_index -> 
+            let cur_val_count = match (Map.find state_map_two state) with
               | Some(v) -> v
               | None -> 0
             in
-            let cur_val = O.get fv_sub (List.to_array [0; cur_count]) in
-            let _ = O.set fv_sub (List.to_array [0; cur_count]) (cur_val +. 1.) in
-            fv_sub
-          )
-          ~init:(fv)
+            (cur_index, cur_val_count))
         in
-        new_fv
+        tuple_list @ idx_list (* TODO: MAYBE REPLACE LATER *)
       )
-      ~init:(feature_vec)
+      ~init:([])
   in
-  
+
+  (* Update the right feature vector indicies *)    
+  let _ = index_count_tuple_list |> List.iter 
+      ~f:(fun (idx, count_val) -> 
+        let cur_val = Owl_dense_ndarray_s.get feature_vec (List.to_array [0; idx]) in
+        let _ = Owl_dense_ndarray_s.set feature_vec (List.to_array [0; idx]) (cur_val +. float_of_int count_val) in
+        ()
+      )
+  in
   feature_vec
 
 
@@ -162,7 +168,7 @@ let classify (input_text: string): (float * string) list =
 
 (* TODO: Implement later *)
 let norm_probs (inp: arr): arr =
-  unimplemented()
+  O.softmax inp
 
 let rank (inp: (string * float) list): (string * float) list =
   unimplemented()
