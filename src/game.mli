@@ -2,9 +2,12 @@
 (* open Core *)
 
 (*
-Get an example and its ground truth from preloaded examples
+    Given a list of target language codes, randomly pick
+    the ground truth language code then call the sampler
+    to Get a random sentence in that given languges
+    Returns (SAMPLE, LANG_CODE)
 *)
-val pick_targets: (string * string) list -> (string * string)
+val pick_targets: string list -> (string * string)
 
 (*
 Define list of answers for the game setting. Given a groundtruth and all possible languages, 
@@ -43,7 +46,7 @@ val winner_string: int -> int -> string
 
 
 (* 
-OVERALL USAGE
+OVERALL USAGE EXAMPLE
 ########################################################################
 Parameters: 
 -mode: Setting the use case mode to game or eval

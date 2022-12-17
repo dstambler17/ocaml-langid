@@ -8,6 +8,16 @@ open Lwt
 open Cohttp
 open Cohttp_lwt_unix
 
+(* Declare Consts *)
+let get_url (lang_code: string) (topic: string): string =
+  "https://"^lang_code^".wikipedia.org/wiki/"^topic
+
+(* Helper function to return list of strings *)
+let topic_list (): string list =
+  [
+    "Blackbeard"; "OpenAI"
+  ]
+
 (* From Cohttp Docs, helper function for making requests *)
 let get_body_helper url_str=
   Client.get (Uri.of_string url_str) 
@@ -49,7 +59,22 @@ let strip_html (raw_input: string): string =
     |> global_replace unicode_re " "
     |> global_replace space_re " "
 
-let sample_sentence (url: string) (module R: Randomness): string option =
-  let sentence_bag = url |> get_html_body |> strip_html |> String.split ~on:'.' in
-  list_sample_helper sentence_bag (module R)
+
+let build_url (lang_code: string) (module R: Randomness): string option =
+  match list_sample_helper (topic_list ()) (module R) with
+  | None -> None
+  | Some(topic) -> Some(get_url lang_code topic)
+
+let sample_text (lang_code: string) (sample_len: int) (module R: Randomness): string option =
+  let url_opt = build_url lang_code (module R) in
+  match url_opt with
+  | None -> None
+  | Some(url) -> 
+    let text_doc = url |> get_html_body |> strip_html in
+    if (String.length text_doc) <= sample_len then
+      Some(text_doc)
+    else
+      let l_idx = R.int ((String.length text_doc) - sample_len) in
+      let r_idx = l_idx + sample_len in
+      Some(String.slice text_doc l_idx r_idx)
   

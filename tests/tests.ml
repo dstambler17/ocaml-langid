@@ -9,7 +9,7 @@ let ex_langs = ["en";"es";"fr";"da"]
 let ex_choices = [("en", true); ("zh", false); ("da", false)]
 let ex_model_out1 = "en"
 let ex_model_out2 = "da"
-let ex_samples = [("hello", "en")]
+let ex_samples = ["en"; "da"]
 
 let test_pick_targets _ = 
   assert_equal ("hello", "en") @@ G.pick_targets ex_samples
