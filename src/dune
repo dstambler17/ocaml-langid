@@ -18,6 +18,23 @@
   )
 )
 
+(library
+  (name sampler)
+  (modules
+    sampler
+    )
+   (libraries
+    core
+    lwt_ssl
+    cohttp-lwt-unix
+    cohttp-async
+    utils
+   )
+   (preprocess 
+   (pps 
+    bisect_ppx
+   )))
+
 
 (library
   (name models)
