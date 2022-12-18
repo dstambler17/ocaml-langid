@@ -174,7 +174,7 @@ let top_choices (input_text: string) (k_choices: int): (string * float) list =
   |> norm_probs
   |> owl_1d_array_to_list
   |> List.rev
-  |> List.zip_exn classes
+  |> List.zip_exn (classes ())
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
 
