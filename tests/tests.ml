@@ -12,6 +12,7 @@ let ex_model_out1 = "en"
 let ex_model_out2 = "da"
 let ex_samples = ["en"; "da"]
 
+(*TODO: TO BE CERTAIN THIS WORKS, RUN THIS 50 times and ensure results are returned in each one as a test case *)
 let test_pick_targets _ = 
   assert_equal ("hello", "en") @@ G.pick_targets ex_samples
 
@@ -57,9 +58,14 @@ let model_tests = "Model" >: test_list [
   (* Add tests here *)
   ]
 
+let sampler_tests = "Sampler" >: test_list [
+  (* Add tests here *)
+  ]
+
 let series = "Assignment2 Tests" >::: [
     game_tests;
     model_tests;
+    sampler_tests; 
   ]
 
 let () = 
