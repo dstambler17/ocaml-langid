@@ -164,6 +164,7 @@ let owl_1d_array_to_list (a: arr): 'a list =
   |> Fn.flip Array.get 1
   |> List.init ~f:(fun x -> x)
   |> List.fold ~f:(fun acc x -> (O.get a [|0;x|])::acc) ~init:([])
+  |> List.rev
 
 let rank (inp: (string * float) list): (string * float) list =
   List.sort ~compare:(fun (_, x1) (_, x2) -> Float.compare x2 x1) inp
@@ -173,8 +174,7 @@ let top_choices (input_text: string) (k_choices: int): (string * float) list =
   |> run_model
   |> norm_probs
   |> owl_1d_array_to_list
-  |> List.rev
-  |> List.zip_exn classes
+  |> List.zip_exn (classes ())
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
 
