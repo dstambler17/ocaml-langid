@@ -23,13 +23,14 @@ let help_print =
    \t\tString to be classified if eval mode is used\n\
    \t\tMake sure your whole string is in quotes!!\n\n"
 
-let game_prompt = 
-  "Welcome to LangID! Can you beat me? I'll give you some text and some language choices. 
-  You'll get a point when you get it right, and a bonus if you get it right and I don't. 
-  Enter STOP to end the game. Let's play!"
+let game_prompt =
+  "Welcome to LangID! Can you beat me? I'll give you some text and some \
+   language choices. \n\
+  \  You'll get a point when you get it right, and a bonus if you get it right \
+   and I don't. \n\
+  \  Enter STOP to end the game. Let's play!"
 
 let rec play_game () =
-  printf "%s" game_prompt;
   printf "Game line\n";
   let input =
     Out_channel.(flush stdout);
@@ -39,7 +40,13 @@ let rec play_game () =
   else (
     print_endline "";
     exit 1)
-    
+
+let get_arg_safe get_type arg_names default args =
+  let arg_raw =
+    try Some (get_type arg_names args default)
+    with CLI.No_param_for_option _ -> None
+  in
+  match arg_raw with Some m -> m | None -> default
 
 let evaluate input_text () =
   let classified = input_text |> Models.classify |> List.hd_exn in
@@ -59,22 +66,20 @@ let main () =
   if argc = 1 then (
     printf "%s" help_print;
     exit 1);
-  let mode = CLI.get_string_def [ "-mode" ] args "eval" in
-  let input_text =
-    match mode with
-    | "eval" -> CLI.get_string_def [ "-input"; "-i" ] args ""
-    | _ -> ""
-  in
-  let n = CLI.get_int_def [ "-top_n" ] args 1 in
+  let mode = get_arg_safe CLI.get_string_def [ "-mode" ] "eval" args in
+  let input_text = get_arg_safe CLI.get_string_def [ "-input"; "-i" ] "" args in 
+  let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 1 args in
   let help = CLI.get_set_bool [ "-h"; "-help" ] args in
   CLI.finalize ();
-  match help with
+  match help with 
   | true ->
       printf "%s" help_print;
       exit 1
   | false -> (
       match mode with
-      | "game" -> play_game ()
+      | "game" ->
+          printf "%s" game_prompt;
+          play_game ()
       | "eval" -> evaluate input_text ()
       | _ ->
           printf "Bad mode parameter given:\n\t%s" mode;
