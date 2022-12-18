@@ -19,6 +19,9 @@ let test_pick_targets _ =
 let test_game_choices _ = 
   assert_equal [("da", false);("en", true);("es", false);("fr", false)] @@ List.sort (G.game_choices "en" ex_langs 4) ~compare:(fun (x1, _) (x2, _) -> String.compare x1 x2)
 
+let test_user_option_string _ = 
+  assert_equal "(1) en (2) zh (3) da " @@ G.user_option_string ex_choices
+
 let test_evaluate_example _ = 
   assert_equal 0.5 @@ G.evaluate_example true true;
   assert_equal 2. @@ G.evaluate_example false true;
@@ -51,6 +54,7 @@ let game_tests = "Game" >: test_list [
   "Test Evaluate Winner" >:: test_evaluate_winner;
   "Test Pick Targets" >:: test_pick_targets;
   "Test Game Choices" >:: test_game_choices;
+  "Test Game Option String" >:: test_user_option_string;
   "Test Event String" >:: test_event_string
   ]
 
