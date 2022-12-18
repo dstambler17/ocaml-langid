@@ -23,7 +23,13 @@ let help_print =
    \t\tString to be classified if eval mode is used\n\
    \t\tMake sure your whole string is in quotes!!\n\n"
 
+let game_prompt = 
+  "Welcome to LangID! Can you beat me? I'll give you some text and some language choices. 
+  You'll get a point when you get it right, and a bonus if you get it right and I don't. 
+  Enter STOP to end the game. Let's play!"
+
 let rec play_game () =
+  printf "%s" game_prompt;
   printf "Game line\n";
   let input =
     Out_channel.(flush stdout);
@@ -33,6 +39,7 @@ let rec play_game () =
   else (
     print_endline "";
     exit 1)
+    
 
 let evaluate input_text () =
   let classified = input_text |> Models.classify |> List.hd_exn in
