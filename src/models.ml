@@ -24,6 +24,8 @@ let num_features () =
 let num_classes () =
   97
 
+let classes = ["af"; "am"; "an"; "ar"; "as"; "az"; "be"; "bg"; "bn"; "br"; "bs"; "ca"; "cs"; "cy"; "da"; "de"; "dz"; "el"; "en"; "eo"; "es"; "et"; "eu"; "fa"; "fi"; "fo"; "fr"; "ga"; "gl"; "gu"; "he"; "hi"; "hr"; "ht"; "hu"; "hy"; "id"; "is"; "it"; "ja"; "jv"; "ka"; "kk"; "km"; "kn"; "ko"; "ku"; "ky"; "la"; "lb"; "lo"; "lt"; "lv"; "mg"; "mk"; "ml"; "mn"; "mr"; "ms"; "mt"; "nb"; "ne"; "nl"; "nn"; "no"; "oc"; "or"; "pa"; "pl"; "ps"; "pt"; "qu"; "ro"; "ru"; "rw"; "se"; "si"; "sk"; "sl"; "sq"; "sr"; "sv"; "sw"; "ta"; "te"; "th"; "tl"; "tr"; "ug"; "uk"; "ur"; "vi"; "vo"; "wa"; "xh"; "zh"; "zu"]
+
 (*Helper function, load json string to a map, then converts to json *)
 let load_json_string (str: string): Yojson.Basic.t =
   Yojson.Basic.from_file str
@@ -69,15 +71,12 @@ let get_state_count_map (input_str: string) (tk_nextmove: int list): (int, int, 
   let state_map, _ = input_str |> String.fold 
     ~f:(fun (state_count_map, state) letter ->
         let state_look_up = (Int.shift_left state 8) + int_of_char letter (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*) in
-        
         let cur_state_opt = tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up) in
-        
         let cur_state = 
           match cur_state_opt with 
           | Some(_, num) -> num 
           | None -> invalid_class_file() (*should not get here*)
         in
-
       let cur_count = match Map.find state_count_map cur_state with
         | Some(v) -> v 
         | None -> 0
@@ -164,7 +163,7 @@ let top_choices (input_text: string) (k_choices: int): (string * float) list =
   |> norm_probs
   |> owl_1d_array_to_list
   |> List.rev
-  |> List.zip_exn (load_classes "models/classes_info.json")
+  |> List.zip_exn classes
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
 
