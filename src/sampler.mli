@@ -16,8 +16,17 @@ val strip_html: string -> string
 val get_html_body: string -> string
 
 (*
-    Sample Random Sentence given a url and call
-    the above functions
-    Params: url, Random module
+   Builds the URL given a lang code string
+   Randomly Samples from a hardcoded list of topics
+   And creates a url to a wikipedia article in the given language
 *)
-val sample_sentence: string -> (module Randomness) -> string option
+val build_url: string -> (module Randomness) -> string option
+
+(*
+    Sample Random Bag of k chars given a Language ID string
+    Build the URL and call
+    the above functions to get the full text
+    Then Sample a random k chars. If k exceeds the size of the article, return the whole article
+        Params: url, Random module
+*)
+val sample_text: string -> int -> (module Randomness) -> string option

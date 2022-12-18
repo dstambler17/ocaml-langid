@@ -2,16 +2,31 @@
 [@@@ocaml.warning "-27"]
 
 open Core
+open Utils
+
+module S = Sampler
 module M = Models
+
+(* Define error function and constants*)
+let sampling_error () =
+  failwith "Sampling Error Occured. Inputs invalid"
+
+let max_sample_length () =
+  150
 
 (*
 Get an example and its ground truth from preloaded examples
 *)
-let pick_targets (ex_gt : (string * string) list) : (string * string) = 
-  ex_gt 
-  |> List.length 
-  |> Random.int 
-  |> List.nth_exn ex_gt
+let pick_targets (lang_codes : string list): (string * string) = 
+  let lang_code_opt = list_sample_helper lang_codes (module Random) in
+  let lang_code, sampled_sent_opt  = match lang_code_opt with 
+    | None -> sampling_error ()
+    | Some(lang_code) -> lang_code, S.sample_text lang_code (max_sample_length ()) (module Random)
+  in
+  
+  match sampled_sent_opt with
+    | None -> sampling_error ()
+    | Some(sampled_sent) -> (sampled_sent, lang_code)
 
 (* 
 add a random sorting bit to each index, sort by those, and return first n values 
