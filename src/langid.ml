@@ -24,22 +24,13 @@ let help_print =
    \t\tMake sure your whole string is in quotes!!\n\n"
 
 let game_prompt =
-  "Welcome to LangID! Can you beat me? I'll give you some text and some \
+  "\n\
+   Welcome to LangID! Can you beat me? I'll give you some text and some \
    language choices. \n\
   \  You'll get a point when you get it right, and a bonus if you get it right \
    and I don't. \n\
-  \  Enter STOP to end the game. Let's play!"
-
-let rec play_game () =
-  printf "Game line\n";
-  let input =
-    Out_channel.(flush stdout);
-    In_channel.(input_line_exn stdin)
-  in
-  if String.( = ) input "" then play_game ()
-  else (
-    print_endline "";
-    exit 1)
+  \  Enter the number associated with the language you're guessing, or enter \
+   STOP to end the game. Let's play!\n\n"
 
 let get_arg_safe get_type arg_names default args =
   let arg_raw =
@@ -47,6 +38,31 @@ let get_arg_safe get_type arg_names default args =
     with CLI.No_param_for_option _ -> None
   in
   match arg_raw with Some m -> m | None -> default
+
+let rec print_tuples =
+  function
+  | [] -> ()
+  | (a, b) :: rest ->
+    Printf.printf "%s, %b; " a b;
+    print_tuples rest
+
+let rec play_game (human_score : float) (model_score : float) () =
+  let sample = G.pick_targets (M.classes ()) in
+  let sentence = Tuple2.get1 sample in
+  let gt = Tuple2.get2 sample in
+  let choices = G.game_choices gt (M.classes ()) 4 in
+  printf "Sentence: %s\nChoices (enter number):\n%s\n\n>>" sentence
+    (G.user_option_string choices);
+  printf "human: %f\nmodel: %f\ngt: %s\n" human_score model_score gt;
+  print_tuples choices;
+  let input =
+    Out_channel.(flush stdout);
+    In_channel.(input_line_exn stdin)
+  in
+  if String.( = ) input "" then play_game 0. 0.()
+  else (
+    print_endline "";
+    exit 1)
 
 let evaluate input_text () =
   let classified = input_text |> Models.classify |> List.hd_exn in
@@ -67,11 +83,14 @@ let main () =
     printf "%s" help_print;
     exit 1);
   let mode = get_arg_safe CLI.get_string_def [ "-mode" ] "eval" args in
-  let input_text = get_arg_safe CLI.get_string_def [ "-input"; "-i" ] "" args in 
+  let input_text = get_arg_safe CLI.get_string_def [ "-input"; "-i" ] "" args in
+  let filename =
+    get_arg_safe CLI.get_string_def [ "-filename"; "-f" ] "" args
+  in
   let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 1 args in
   let help = CLI.get_set_bool [ "-h"; "-help" ] args in
   CLI.finalize ();
-  match help with 
+  match help with
   | true ->
       printf "%s" help_print;
       exit 1
@@ -79,7 +98,7 @@ let main () =
       match mode with
       | "game" ->
           printf "%s" game_prompt;
-          play_game ()
+          play_game 0. 0. ()
       | "eval" -> evaluate input_text ()
       | _ ->
           printf "Bad mode parameter given:\n\t%s" mode;
