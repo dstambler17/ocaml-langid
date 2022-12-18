@@ -10,8 +10,7 @@ let read_file_input (file_path: string): string list =
   strings
 
 (*
-  
- Taken from Assignment 4 of the JHU functional course
+ Taken from the NGram Assignment of the JHU functional course
  Allows for us to pass in a random module to file
 *)
 module type Randomness = sig

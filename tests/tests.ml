@@ -4,6 +4,7 @@ open Core
 open OUnit2
 module G = Game
 module M = Models
+module S = Sampler
 
 let ex_langs = ["en";"es";"fr";"da"]
 let ex_choices = [("en", true); ("zh", false); ("da", false)]

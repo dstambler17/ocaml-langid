@@ -11,6 +11,11 @@ type arr = Owl_dense_ndarray_s.arr
   (*(float, Stdlib.Bigarray.float32_elt, Stdlib.Bigarray.c_layout )
    Stdlib.Bigarray.Genarray.t *)
 
+(*
+  Returns all available classes   
+*)
+val classes: unit -> string list
+
 (* 
    Convert text input to a feature vector 
    Ex input : "Hi, my name is Jack"

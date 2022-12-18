@@ -5,4 +5,5 @@
     ounit2
     game
     models
+    sampler
   ))
