@@ -48,7 +48,15 @@ let game_choices (gt : string) (langs: string list) (num_choices : int): (string
   |> Fn.flip shuffle_and_pick_n num_choices in 
   shuffle_and_pick_n (gt :: other_langs) (1 + num_choices)
   |> List.map ~f:(fun x -> (x, if String.(=) x gt then true else false))
-  
+
+let user_option_string (choices : (string * bool) list) : string = 
+  choices 
+  |> List.unzip 
+  |> Tuple2.get1
+  |> List.foldi 
+    ~init:"" 
+    ~f:(fun i str cur ->
+           str ^ "(" ^ string_of_int (i + 1) ^ ") " ^ cur ^ " ")
 (*
 Score user guess vs model output  
 bools are outputs of check player and model response functions

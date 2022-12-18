@@ -15,6 +15,11 @@ output a list of languages containing groundtruth, paired with a bool whether it
 *)
 val game_choices: string -> string list -> int -> (string * bool) list
 
+(* 
+Given a ground truth list, make a string to print for user options
+*)
+val user_option_string: (string * bool) list -> string
+
 (*
 Score user guess vs model output  
 bools are outputs of check player and model response functions
@@ -43,7 +48,6 @@ val event_string: bool -> bool -> string -> string
 Pick winner based on scores at the end of the game   
 *)
 val winner_string: int -> int -> string 
-
 
 (* 
 OVERALL USAGE EXAMPLE
