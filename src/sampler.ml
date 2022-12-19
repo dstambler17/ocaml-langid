@@ -4,7 +4,6 @@ open Utils
 open Lwt
 open Cohttp
 open Cohttp_lwt_unix
-open Printf
 
 (* Declare Consts *)
 let get_url (lang_code : string) (topic : string) : string =
@@ -20,31 +19,6 @@ let get_body_helper url_str =
   body |> Cohttp_lwt.Body.to_string >|= fun body -> body
 
 let get_html_body (url : string) : string = Lwt_main.run (get_body_helper url)
-
-(* let eng_to_target_request (src : string) (trg_lang_code : string) =
-  let uri = Uri.of_string "https://libretranslate.com/translate" in
-  let headers =
-    Header.init () |> fun h -> Header.add h "Content-Type" "application/json"
-  in
-  let body =
-    [
-      sprintf "q: %s" src;
-      "source: en";
-      sprintf "target: %s" trg_lang_code;
-      "format: text";
-      "api_key: \"\"";
-    ]
-    |> String.concat ~sep:", " |> sprintf "{%s}" |> Cohttp_lwt.Body.of_string
-  in
-  printf "%s" (body |> Cohttp_lwt.Body.to_string >|= fun body -> body);
-  Client.post ~headers ~body uri >>= fun (resp, body) ->
-  body |> Cohttp_lwt.Body.to_string >|= fun body -> body
-
-let get_translated (src : string) (trg_lang_code : string) : string =
-  let body = Lwt_main.run (eng_to_target_request src trg_lang_code) in
-  printf "%s" body;
-  let open Yojson.Basic.Util in
-  body |> Yojson.Basic.from_string |> member "translatedText" |> to_string *)
 
 let strip_html (raw_input : string) : string =
   (* Define regex for extracting relevant text from raw HTML *)
