@@ -10,7 +10,7 @@ module M = Models
 module G = Game
 module CLI = Minicli.CLI
 
-let help_print =
+let help_print () =
   "\n\
    Example usage:\n\
    \t./langid.exe -mode <string> -top_n <int> -input <string> [-h;-help]\n\n\
@@ -24,7 +24,7 @@ let help_print =
    \t\tString to be classified if eval mode is used\n\
    \t\tMake sure your whole string is in quotes!!\n\n"
 
-let game_prompt =
+let game_prompt () =
   "\n\
    Welcome to LangID! Can you beat me? I'll give you some text and some \
    language choices. \n\
@@ -33,10 +33,16 @@ let game_prompt =
   \  Enter the number associated with the language you're guessing, or enter \
    STOP to end the game. Let's play!\n\n"
 
-let bad_input_string =
+let bad_input_string () =
   "You gave me bad input! You don't play by the rules, you're done!"
 
-let num_choices = 4
+let top_choices_string preds () =
+  preds
+  |> List.map ~f:(fun (lang, prob) ->
+         (List.Assoc.find_exn (M.classes ()) ~equal:String.( = ) lang, prob))
+  |> List.fold ~f:(fun str cur -> str ^ (sprintf "%s: %.2f\n" (Tuple2.get1 cur) ((Tuple2.get2 cur) *. 100.))) ~init:("")
+
+let num_choices () = 4
 
 (*
    Do most error handling for parsing of command line args with missing input
@@ -53,7 +59,7 @@ let rec game_loop (user_score : int) (model_score : int) () =
   let sentence = Tuple2.get1 sample in
   let gt = Tuple2.get2 sample in
   let choices =
-    G.game_choices gt (M.classes () |> List.unzip |> Tuple2.get1) num_choices
+    G.game_choices gt (M.classes () |> List.unzip |> Tuple2.get1) (num_choices ())
   in
   let model_correct =
     sentence |> M.classify |> List.hd_exn |> Tuple2.get1
@@ -75,7 +81,7 @@ let rec game_loop (user_score : int) (model_score : int) () =
       print_endline "";
       exit 1
   | -1 ->
-      printf "%s" bad_input_string;
+      printf "%s" (bad_input_string ());
       print_endline "";
       exit 1
   | _ ->
@@ -89,22 +95,28 @@ let rec game_loop (user_score : int) (model_score : int) () =
 
 let init_game () = game_loop 0 0 ()
 
-let evaluate input_text () =
+let evaluate input_text top_k () =
   let classified = input_text |> Models.classify |> List.hd_exn in
-  let language = Tuple2.get1 classified in
+  let language =
+    List.Assoc.find_exn (M.classes ()) ~equal:String.( = )
+      (Tuple2.get1 classified)
+  in
   let likelihood = Tuple2.get2 classified *. 100. in
+  let k_preds = M.top_choices input_text top_k in
   printf
     "You input:\n\
      %s\n\n\
-     This is written in %s.\n\
-     We say this with %.2f%% likelihood.\n\n\
-     Thanks for using langid! :)" input_text language likelihood;
+     This is written in %s, with %.2f%% likelihood.\n\n\
+     The full read-out of the top %d languages we predict is:\n\
+     %s\n\n\
+     Thanks for using langid! :)" input_text language likelihood top_k
+    (top_choices_string k_preds ());
   Out_channel.(flush stdout)
 
 let main () =
   let argc, args = CLI.init () in
   if argc = 1 then (
-    printf "%s" help_print;
+    printf "%s" (help_print ());
     exit 1);
   let mode = get_arg_safe CLI.get_string_def [ "-mode" ] "eval" args in
   let input_text = get_arg_safe CLI.get_string_def [ "-input"; "-i" ] "" args in
@@ -114,15 +126,15 @@ let main () =
   CLI.finalize ();
   match help with
   | true ->
-      printf "%s" help_print;
+      printf "%s" (help_print ());
       exit 1
   | false -> (
       match mode with
       | "game" ->
           Out_channel.(flush stdout);
-          printf "%s" game_prompt;
+          printf "%s" (game_prompt ());
           init_game ()
-      | "eval" -> evaluate input_text ()
+      | "eval" -> evaluate input_text n ()
       | _ ->
           printf "Bad mode parameter given:\n\t%s" mode;
           exit 1)
