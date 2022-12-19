@@ -20,12 +20,17 @@ Given a ground truth list, make a string to print for user options
 *)
 val user_option_string: (string * bool) list -> string
 
+(* 
+Get user input from the command line
+*)
+val get_user_input: int
+
 (*
 Score user guess vs model output  
 bools are outputs of check player and model response functions
 1 if user wins, 0.5 if tie, 0 if user 
 *)
-val evaluate_example: bool -> bool -> float
+val evaluate_example: bool -> bool -> (int * int)
 
 (*
 Check if the player guessed correctly or not   

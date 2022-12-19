@@ -57,23 +57,43 @@ let user_option_string (choices : (string * bool) list) : string =
     ~init:"" 
     ~f:(fun i str cur ->
            str ^ "(" ^ string_of_int (i + 1) ^ ") " ^ cur ^ " ")
+
+let get_user_input : int = 
+  let raw_input =
+    Out_channel.(flush stdout);
+    In_channel.(input_line_exn stdin)
+  in 
+  let stopped = match raw_input with
+  | "STOP" -> "0"
+  | _ -> raw_input
+  in 
+  let cast_input = try Some (int_of_string stopped) with Failure _ -> None
+  in  
+  match cast_input with 
+  | Some i -> i
+  | None -> (-1)
+
 (*
 Score user guess vs model output  
 bools are outputs of check player and model response functions
 1 if user wins, 0.5 if tie, 0 if user 
 *)
-let evaluate_example (user_correct: bool) (model_correct: bool) : float = 
+let evaluate_example (user_correct: bool) (model_correct: bool) : (int * int) = 
   match user_correct, model_correct with
-  | true, true -> 0.5
-  | true, false -> 1.
-  | false, true -> 2.
-  | false, false -> 0.
+  | true, true -> (1, 1)
+  | true, false -> (1, 0)
+  | false, true -> (0, 1)
+  | false, false -> (0, 0)
 
 (*
 Check if the player guessed correctly or not   
 *)
 let check_player_response (input_idx : int) (possible_choices : (string * bool) list) : bool = 
-  input_idx |> List.nth_exn possible_choices |> Tuple2.get2
+  let correct = try Some (input_idx |> List.nth_exn possible_choices |> Tuple2.get2) with 
+  Failure _ -> None in 
+  match correct with 
+  | Some (c) -> c
+  | None -> false
   
 (*
 given model guess and groundtruth, check if model guessed correctly
