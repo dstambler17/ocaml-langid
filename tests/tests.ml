@@ -35,6 +35,11 @@ let test_game_choices _ =
 let test_user_option_string _ = 
   assert_equal "(1) English (2) Chinese (3) Danish " @@ G.user_option_string ex_choices
 
+let test_handle_user_errors _ = 
+  assert_equal 0 @@ G.handle_user_errors "STOP";
+  assert_equal (-1) @@ G.handle_user_errors "whoops";
+  assert_equal 1 @@ G.handle_user_errors "1"
+
 let test_evaluate_example _ = 
   assert_equal (1, 1) @@ G.evaluate_example true true;
   assert_equal (1, 0) @@ G.evaluate_example true false;
@@ -68,7 +73,8 @@ let game_tests = "Game" >: test_list [
   "Test Pick Targets" >:: test_pick_targets;
   "Test Game Choices" >:: test_game_choices;
   "Test Game Option String" >:: test_user_option_string;
-  "Test Event String" >:: test_event_string
+  "Test Event String" >:: test_event_string;
+  "Test Handle User Error" >:: test_handle_user_errors
   ]
 
 (*** MODEL TESTS ***)
