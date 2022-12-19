@@ -49,25 +49,29 @@ let get_arg_safe get_type arg_names default args =
   match arg_raw with Some m -> m | None -> default
 
 let rec game_loop (user_score : int) (model_score : int) () =
-  let sample = G.pick_targets (M.classes ()) in
+  let sample = G.pick_targets (M.classes () |> List.unzip |> Tuple2.get1) in
   let sentence = Tuple2.get1 sample in
   let gt = Tuple2.get2 sample in
-  let choices = G.game_choices gt (M.classes ()) num_choices in
+  let choices =
+    G.game_choices gt (M.classes () |> List.unzip |> Tuple2.get1) num_choices
+  in
   let model_correct =
     sentence |> M.classify |> List.hd_exn |> Tuple2.get1
     |> Fn.flip G.check_model_response choices
   in
-  printf "Sentence: %s\nChoices (enter number):\n%s\n\n>> " sentence
+  printf "Sentence:\n%s\nChoices (enter number):\n%s\n\n>> %!" sentence
     (G.user_option_string choices);
   let user_input =
     let raw_input =
       Out_channel.(flush stdout);
       In_channel.(input_line_exn stdin)
     in
-    G.handle_user_errors raw_input in
+    G.handle_user_errors raw_input
+  in
   match user_input with
   | 0 ->
       printf "%s" (G.winner_string user_score model_score);
+      Out_channel.(flush stdout);
       print_endline "";
       exit 1
   | -1 ->
@@ -75,11 +79,12 @@ let rec game_loop (user_score : int) (model_score : int) () =
       print_endline "";
       exit 1
   | _ ->
-      let user_correct = G.check_player_response user_input choices in
+      let user_correct = G.check_player_response (user_input - 1) choices in
       let user_points, model_points =
         G.evaluate_example user_correct model_correct
       in
-      printf "%s" (G.event_string user_correct model_correct gt);
+      printf "%s\n" (G.event_string user_correct model_correct gt);
+      Out_channel.(flush stdout);
       game_loop (user_score + user_points) (model_score + model_points) ()
 
 let init_game () = game_loop 0 0 ()
@@ -93,8 +98,7 @@ let evaluate input_text () =
      %s\n\n\
      This is written in %s.\n\
      We say this with %.2f%% likelihood.\n\n\
-     Thanks for using langid! :)%!" input_text language likelihood;
-  print_endline "";
+     Thanks for using langid! :)" input_text language likelihood;
   Out_channel.(flush stdout)
 
 let main () =
@@ -108,7 +112,6 @@ let main () =
   let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 1 args in
   let help = CLI.get_set_bool [ "-h"; "-help" ] args in
   CLI.finalize ();
-  printf "%s" game_prompt;
   match help with
   | true ->
       printf "%s" help_print;
@@ -116,6 +119,7 @@ let main () =
   | false -> (
       match mode with
       | "game" ->
+          Out_channel.(flush stdout);
           printf "%s" game_prompt;
           init_game ()
       | "eval" -> evaluate input_text ()

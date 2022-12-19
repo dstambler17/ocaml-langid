@@ -54,7 +54,11 @@ let game_choices (gt : string) (langs : string list) (num_choices : int) :
 let user_option_string (choices : (string * bool) list) : string =
   choices |> List.unzip |> Tuple2.get1
   |> List.foldi ~init:"" ~f:(fun i str cur ->
-         str ^ "(" ^ string_of_int (i + 1) ^ ") " ^ cur ^ " ")
+         str ^ "("
+         ^ string_of_int (i + 1)
+         ^ ") "
+         ^ List.Assoc.find_exn (M.classes ()) ~equal:String.( = ) cur
+         ^ " ")
 
 let handle_user_errors (raw_input : string) : int =
   let stopped = match raw_input with "STOP" -> "0" | _ -> raw_input in
@@ -80,7 +84,7 @@ let check_player_response (input_idx : int)
     (possible_choices : (string * bool) list) : bool =
   let correct =
     try Some (input_idx |> List.nth_exn possible_choices |> Tuple2.get2)
-    with Failure _ -> None
+    with Invalid_argument _ -> None
   in
   match correct with Some c -> c | None -> false
 
@@ -102,26 +106,31 @@ let event_string (user_correct : bool) (model_correct : bool) (gt : string) :
     string =
   match (user_correct, model_correct) with
   | true, true ->
-      Printf.sprintf "You were correct, as was I! It was indeed %s\n" gt
+      Printf.sprintf "You were correct, as was I! It was indeed %s\n"
+        (List.Assoc.find_exn (M.classes ()) ~equal:String.( = ) gt)
   | true, false -> "Ah! You got me on this one. I'll get you next time...\n"
   | false, true ->
       Printf.sprintf "Ha! One for me, none for you! The actual answer was %s\n"
-        gt
+        (List.Assoc.find_exn (M.classes ()) ~equal:String.( = ) gt)
   | false, false ->
       Printf.sprintf
         "Seems we're both bad at this - no points for either of us. The actual \
          answer was %s\n"
-        gt
+        (List.Assoc.find_exn (M.classes ()) ~equal:String.( = ) gt)
 
 (*
 Pick winner based on scores at the end of the game   
 *)
 let winner_string (user_score : int) (model_score : int) : string =
   match compare user_score model_score with
-  | -1 -> "Ha-Ha, I win! AI will rule the world!"
+  | -1 ->
+      Printf.sprintf "Ha-Ha, I win %d-%d! AI will rule the world!" model_score
+        user_score
   | 0 ->
-      "Great game, that was a hard-fought tie. Maybe we should play again to \
-       settle the score..."
+      Printf.sprintf
+        "Great game, that was a hard-fought tie at %d. Maybe we should play \
+         again to settle the score..."
+        user_score
   | 1 ->
       Printf.sprintf
         "You beat me %d-%d! Are you sure you're not a computer? Good game."
