@@ -40,6 +40,7 @@ let strip_html (raw_input: string): string =
   let unicode_re = regexp "&#[0-9A-Fa-f]+;" in
   let head_re = regexp "<\\(head\\).*?>.*?</\\(head\\)>" in
   let nav_re = regexp "<\\(nav\\).*?>.*?</\\(nav\\)>" in
+  let style_re = regexp "<\\(style\\).*?>.*?</\\(style\\)>" in
   let footer_re = regexp "<\\(footer\\).*?>.*?</\\(footer\\)>" in
   let script_re = regexp "<\\(script\\).*?>.*?</\\(script\\)>" in
   let table_re =  regexp "<\\(table\\).*?>.*?</\\(table\\)>" in
@@ -52,12 +53,14 @@ let strip_html (raw_input: string): string =
     |> global_replace nav_re " "
     |> global_replace footer_re " "
     |> global_replace script_re " "
+    |> global_replace style_re " "
     |> global_replace table_re " "
     |> global_replace tag_re " "
     |> global_replace tab_strip_re " "
     |> global_replace arrow_re " "
     |> global_replace unicode_re " "
     |> global_replace space_re " "
+    |> String.strip
 
 
 let build_url (lang_code: string) (module R: Randomness): string option =

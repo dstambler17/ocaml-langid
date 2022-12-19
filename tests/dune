@@ -6,4 +6,5 @@
     game
     models
     sampler
+    utils
   ))
