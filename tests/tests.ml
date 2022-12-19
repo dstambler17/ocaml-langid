@@ -33,12 +33,12 @@ let test_game_choices _ =
   assert_equal [("da", false);("en", true);("es", false);("fr", false)] @@ List.sort (G.game_choices "en" ex_langs 4) ~compare:(fun (x1, _) (x2, _) -> String.compare x1 x2)
 
 let test_user_option_string _ = 
-  assert_equal "(1) en (2) zh (3) da " @@ G.user_option_string ex_choices
+  assert_equal "(1) English (2) Chinese (3) Danish " @@ G.user_option_string ex_choices
 
 let test_evaluate_example _ = 
   assert_equal (1, 1) @@ G.evaluate_example true true;
-  assert_equal (1, 0) @@ G.evaluate_example false true;
-  assert_equal (0, 1) @@ G.evaluate_example true false;
+  assert_equal (1, 0) @@ G.evaluate_example true false;
+  assert_equal (0, 1) @@ G.evaluate_example false true;
   assert_equal (0, 0) @@ G.evaluate_example false false
 
 let test_player_response _ = 
@@ -50,15 +50,15 @@ let test_model_response _ =
   assert_equal false @@ G.check_model_response ex_model_out2 ex_choices
 
 let test_evaluate_winner _ = 
-  assert_equal "Ha-Ha, I win! AI will rule the world!" @@ G.winner_string 0 1;
-  assert_equal "Great game, that was a hard-fought tie. Maybe we should play again to settle the score..." @@ G.winner_string 1 1;
+  assert_equal "Ha-Ha, I win 1-0! AI will rule the world!" @@ G.winner_string 0 1;
+  assert_equal "Great game, that was a hard-fought tie at 1. Maybe we should play again to settle the score..." @@ G.winner_string 1 1;
   assert_equal "You beat me 2-1! Are you sure you're not a computer? Good game." @@ G.winner_string 2 1
 
 let test_event_string _ = 
-  assert_equal "You were correct, as was I! It was indeed en\n" @@ G.event_string true true ex_model_out1;
+  assert_equal "You were correct, as was I! It was indeed English\n" @@ G.event_string true true ex_model_out1;
   assert_equal "Ah! You got me on this one. I'll get you next time...\n" @@ G.event_string true false ex_model_out1;
-  assert_equal "Ha! One for me, none for you! The actual answer was en\n" @@ G.event_string false true ex_model_out1;
-  assert_equal "Seems we're both bad at this - no points for either of us. The actual answer was en\n" @@ G.event_string false false ex_model_out1
+  assert_equal "Ha! One for me, none for you! The actual answer was English\n" @@ G.event_string false true ex_model_out1;
+  assert_equal "Seems we're both bad at this - no points for either of us. The actual answer was English\n" @@ G.event_string false false ex_model_out1
 
 let game_tests = "Game" >: test_list [
   "Test Evaluate Example" >:: test_evaluate_example;
