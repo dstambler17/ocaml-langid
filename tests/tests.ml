@@ -23,10 +23,10 @@ let test_user_option_string _ =
   assert_equal "(1) en (2) zh (3) da " @@ G.user_option_string ex_choices
 
 let test_evaluate_example _ = 
-  assert_equal 0.5 @@ G.evaluate_example true true;
-  assert_equal 2. @@ G.evaluate_example false true;
-  assert_equal 1. @@ G.evaluate_example true false;
-  assert_equal 0. @@ G.evaluate_example false false
+  assert_equal (1, 1) @@ G.evaluate_example true true;
+  assert_equal (1, 0) @@ G.evaluate_example false true;
+  assert_equal (0, 1) @@ G.evaluate_example true false;
+  assert_equal (0, 0) @@ G.evaluate_example false false
 
 let test_player_response _ = 
   assert_equal true @@ G.check_player_response 0 ex_choices;
