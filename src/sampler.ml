@@ -1,6 +1,3 @@
-[@@@ocaml.warning "-27"]
-[@@@ocaml.warning "-33"]
-
 open Core
 open Str
 open Utils

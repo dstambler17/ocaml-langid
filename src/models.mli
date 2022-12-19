@@ -1,6 +1,3 @@
-[@@@ocaml.warning "-33"]
-
-open Owl
 open Core
 
 (*
