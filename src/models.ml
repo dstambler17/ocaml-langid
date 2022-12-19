@@ -4,9 +4,7 @@
 
 open Owl
 open Core
-open Utils
 module O = Owl_dense_ndarray_s
-module U = Owl_utils_array
 
 type arr = O.arr
 
@@ -245,10 +243,10 @@ let nb_classprobs (fv : arr) (hidden : arr) (bias : arr) : arr =
 
 let run_model (input_text : string) : arr =
   (*load in all models, FSTs, and files*)
-  let tk_nextmove = load_fst_list "models/fst_feature_model_info.json" in
-  let tk_output = load_fst_map "models/fst_feature_model_info.json" in
-  let hidden_weights = load_model_file "models/nb_ptc.npy" in
-  let hidden_bias = load_model_file "models/nb_pc.npy" in
+  let tk_nextmove = load_fst_list "/Users/daniel/Documents/ocaml-langid/models/fst_feature_model_info.json" in
+  let tk_output = load_fst_map "/Users/daniel/Documents/ocaml-langid/models/fst_feature_model_info.json" in
+  let hidden_weights = load_model_file "/Users/daniel/Documents/ocaml-langid/models/nb_ptc.npy" in
+  let hidden_bias = load_model_file "/Users/daniel/Documents/ocaml-langid/models/nb_pc.npy" in
 
   (* convert text input to feature vector *)
   let feature_vec = instance2fv input_text tk_nextmove tk_output in

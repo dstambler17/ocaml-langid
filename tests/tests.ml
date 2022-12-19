@@ -3,10 +3,12 @@
 open Core
 open OUnit2
 open Utils
+open Owl
 
 module G = Game
 module M = Models
 module S = Sampler
+module O = Owl_dense_ndarray_s
 
 (* Declare a seeded random module for ease of testing. Always returns last elem *)
 module SeededRandom : Randomness = struct  
@@ -24,7 +26,6 @@ let ex_model_out1 = "en"
 let ex_model_out2 = "da"
 let ex_samples = ["en"; "da"]
 
-(*TODO: TO BE CERTAIN THIS WORKS, RUN THIS 50 times and ensure results are returned in each one as a test case *)
 let test_pick_targets _ = 
   assert_equal ("hello", "en") @@ G.pick_targets ex_samples
 
@@ -71,35 +72,53 @@ let game_tests = "Game" >: test_list [
   ]
 
 (*** MODEL TESTS ***)
-let test_get_state_count_map _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+let test_classes _ =
+  assert_equal true @@ ((List.length (M.classes ())) = 97)
 
-let test_get_index_count_list _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+(*TODO: IF CAN'T TEST, DELETE *)
+(*let test_instance2fv _ = 
+  let tk_nextmove = M.load_fst_list "models/fst_feature_model_info.json" in
+  let tk_output = M.load_fst_map "models/fst_feature_model_info.json" in
+  let fv = M.instance2fv "hello world" tk_nextmove tk_output in
+  assert_equal 4. @@ O.sum' fv;
+  assert_equal [1; 97] @@ (Array.to_list (O.shape fv))*)
 
-let test_instance2fv _ = 
-  assert_equal true @@ G.check_player_response 0 ex_choices
 
 let test_nb_classprobs _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+  (* Test basic network works and keeps shape *)
+  let test_input = O.gaussian (List.to_array [1; 7480]) in
+  let test_hidden = O.gaussian (List.to_array [7480; 97]) in
+  let test_bias = O.gaussian (List.to_array [1; 97]) in
+  assert_equal [1; 97] (Array.to_list (O.shape (M.nb_classprobs test_input test_hidden test_bias)))
 
 let test_norm_probs _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+  (* Init a noisy array from the normal distribution *)
+  let noisy = O.gaussian (List.to_array [1; 100]) in
+  let prob_dist = (O.sum' (M.norm_probs noisy)) |> Float.round_decimal ~decimal_digits:3 in
+  assert_equal prob_dist 1.
 
 let test_top_choices _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+  assert_equal [("en", 0.72809302806854248); ("it", 0.14068444073200226); ("nl", 0.058744296431541443)] @@ M.top_choices "hello world" 3
 
 let test_rank _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+  assert_equal [] @@ M.rank [];
+  assert_equal [("es", 0.76); ("en", 0.16); ("da", 0.01)] @@ M.rank [ ("en", 0.16); ("da", 0.01); ("es", 0.76)]
 
 let test_classify _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+  let classification_output_one = M.classify "hello world" in
+  let classification_output_two = M.classify "楽しいのでプールに飛び込むのが好きです" in
+  let classification_output_three = M.classify "Мне нравится нырять в бассейне, потому что это весело" in
+  
+  assert_equal [("en", 0.72809302806854248)] @@ classification_output_one;
+  assert_equal [("ja", 1.)] @@ classification_output_two;
+  assert_equal [("ru", 1.)] @@ classification_output_three
+
 
 let model_tests = "Model" >: test_list [
   (* Add tests here *)
-  "Test Get State Count Map" >:: test_get_state_count_map;
-  "Test Get Index Count List" >:: test_get_index_count_list;
-  "Test Instance To Feature Vector" >:: test_instance2fv;
+
+  "Test Classes" >:: test_classes;
+  (*"Test Instance To Feature Vector" >:: test_instance2fv;*)
   "Test Model Inference" >:: test_nb_classprobs;
   "Test Norm Probs" >:: test_norm_probs;
   "Test Top Choices" >:: test_top_choices;
@@ -140,7 +159,7 @@ let ex_html_input =
   </html>"
 
 let clean_html_output = 
-  "Welcome to my page ! This is some text with a link in it. This is a paragraph with a time in it."
+  "Welcome to my page ! This is some text with a link in it. This is some more text with a bold word in it. This is a paragraph with a time in it."
 
 let test_get_html_body _ =
   (*Tests that <body> is in the response item. Yes, example.com is apperently a real website *)
@@ -152,12 +171,16 @@ let test_strip_html _ =
   assert_equal clean_html_output @@ S.strip_html ex_html_input
 
 let test_build_url _ =
-  assert_equal None @@ @@ build_url "en" (module BadRandom); 
-  assert_equal (Some "https://en.wikipedia.org/wiki/OpenAI") @@ build_url "en" (module SeededRandom) 
+  assert_equal None @@ S.build_url "en" (module BadRandom); 
+  assert_equal (Some "https://en.wikipedia.org/wiki/OpenAI") @@ S.build_url "en" (module SeededRandom) 
 
 let test_sample_text _ =
-  let sampled_res_opt =  sample_text "en" 10 (module BadRandom) in
-  assert_equal None @@ @@ sample_text "en" 10 (module BadRandom); 
+  let sample_out = match S.sample_text "en" 10 (module SeededRandom) with
+    | None -> ""
+    | Some(str) -> str
+  in
+  assert_equal None @@ S.sample_text "en" 10 (module BadRandom);
+  assert_equal true @@ (String.length sample_out = 10)
 
   
 let sampler_tests = "Sampler" >: test_list [
