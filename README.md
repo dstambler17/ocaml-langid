@@ -60,3 +60,5 @@ The sampler used to generate sentences for the game draws random sample sentence
 We encountered an example in our demo in which "Hello World" was classified as Italian. While caught off guard by this, we realized that, as the model works by accumulating probability in transition states between ASCII characters, the mix of short sentence and capitalization throw off the prediction (both "hello world" and "Hello world" are correctly categorized as English). This in fact is not a bug, but a feature :)
 
 Note that the model works incredibly well in the game setting as the sentence length is necessarily longer and thus the model is better able to make assumptions based off character transitions.
+
+Command-line args have also been fixed to more elegantly handle errors, and automatically output help options if there is an issue with the input given to the program.
