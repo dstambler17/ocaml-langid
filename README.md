@@ -41,8 +41,8 @@ NOTE FOR MAC USERS: You might need to `brew install ssl` and `brew install open-
 
 Arguments:
 * `-mode` - either `game` or `eval`. Defaults to `eval` if flag not provided
-* `-top_n` - number of predicted languages to output. Defaults to 3 if not provided.
-* `-input` - if "eval" mode used, string to predict language. Defaults to "" if not provided
+* `-top_n` - number of predicted languages to output. Defaults to `3` if not provided.
+* `-input` - if "eval" mode used, string to predict language. Defaults to `""` if not provided
 
 #### Evaluation
 ```./_build/default/src/langid.exe -mode eval -top_n 3 -input "Earth is beautiful with a bright blue sky and green trees```
