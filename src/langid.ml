@@ -121,7 +121,7 @@ let main () =
   let mode = get_arg_safe CLI.get_string_def [ "-mode" ] "eval" args in
   let input_text = get_arg_safe CLI.get_string_def [ "-input"; "-i" ] "" args in
   let fname = get_arg_safe CLI.get_string_def [ "-filename"; "-f" ] "" args in
-  let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 1 args in
+  let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 3 args in
   let help = CLI.get_set_bool [ "-h"; "-help" ] args in
   CLI.finalize ();
   match help with

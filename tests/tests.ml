@@ -3,7 +3,6 @@
 open Core
 open OUnit2
 open Utils
-open Owl
 
 module G = Game
 module M = Models
@@ -12,7 +11,7 @@ module O = Owl_dense_ndarray_s
 
 (* IMPORTANT NOTE FOR COURSE ASSISTANTS GRADING THIS: IN ORDER TO TEST THE CLASSIFIER, 
    YOU MUST CHANGE THIS VARIABLE TO YOUR TOP LEVEL WORKING DIRECTORY PATH *)
-let working_dir_path = "/Users/daniel/Documents/ocaml-langid"
+let working_dir_path = "/Users/gurion/Desktop/hopkins/masters/fall_22/functional_programming/ocaml-langid"
 
 (* Declare a seeded random module for ease of testing. Always returns last elem *)
 module SeededRandom : Randomness = struct  
@@ -53,7 +52,8 @@ let test_evaluate_example _ =
 
 let test_player_response _ = 
   assert_equal true @@ G.check_player_response 0 ex_choices;
-  assert_equal false @@ G.check_player_response 1 ex_choices
+  assert_equal false @@ G.check_player_response 1 ex_choices;
+  assert_equal false @@ G.check_player_response 42 ex_choices
 
 let test_model_response _ = 
   assert_equal true @@ G.check_model_response ex_model_out1 ex_choices;

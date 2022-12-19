@@ -7,7 +7,7 @@ module S = Sampler
 module M = Models
 
 (* Define error function and constants*)
-let sampling_error () = failwith "Sampling Error Occured. Inputs invalid"
+let sampling_error () = failwith "Sampling Error Occured. Inputs invalid" [@coverage off]
 let max_sample_length () = 150
 
 (*
@@ -17,14 +17,14 @@ let pick_targets (lang_codes : string list) : string * string =
   let lang_code_opt = list_sample_helper lang_codes (module Random) in
   let lang_code, sampled_sent_opt =
     match lang_code_opt with
-    | None -> sampling_error ()
+    | None -> sampling_error () [@coverage off]
     | Some lang_code ->
         ( lang_code,
           S.sample_text lang_code (max_sample_length ()) (module Random) )
   in
 
   match sampled_sent_opt with
-  | None -> sampling_error ()
+  | None -> sampling_error () [@coverage off]
   | Some sampled_sent -> (sampled_sent, lang_code)
 
 (*
@@ -61,7 +61,7 @@ let user_option_string (choices : (string * bool) list) : string =
          ^ " ")
 
 let handle_user_errors (raw_input : string) : int =
-  let stopped = match raw_input with "STOP" -> "0" | _ -> raw_input in
+  let stopped = match raw_input |> String.lowercase |> String.strip with "stop" -> "0" | _ -> raw_input in
   let cast_input = try Some (int_of_string stopped) with Failure _ -> None in
   match cast_input with Some i -> i | None -> -1
 
@@ -135,4 +135,4 @@ let winner_string (user_score : int) (model_score : int) : string =
       Printf.sprintf
         "You beat me %d-%d! Are you sure you're not a computer? Good game."
         user_score model_score
-  | _ -> failwith "I guess no one wins"
+  | _ -> failwith "I guess no one wins" [@coverage off]

@@ -2,13 +2,10 @@
 [@@@ocaml.warning "-27"]
 [@@@ocaml.warning "-32"]
 
-open Owl
 open Core
 module O = Owl_dense_ndarray_s
 
 type arr = O.arr
-
-let unimplemented () = failwith "unimplemented"
 
 let invalid_class_file () =
   invalid_arg
@@ -17,7 +14,6 @@ let invalid_class_file () =
 
 (* Define Consts *)
 let num_features () = 7480
-let num_classes () = 97
 
 let classes () =
   [
@@ -124,14 +120,6 @@ let classes () =
 let load_json_string (str : string) : Yojson.Basic.t =
   Yojson.Basic.from_file str
 
-(* The following five functions deal with loading all model/class info *)
-
-(*Loads lang id classes into list, but first Load class into json obj. *)
-let load_classes (file_path : string) : string list =
-  let open Yojson.Basic.Util in
-  let json_item = load_json_string file_path in
-  json_item |> member "classes" |> to_list |> filter_string
-
 (* Loads Finite State Transducer Model List called 'tk_nextmove' *)
 let load_fst_list (file_path : string) : int list =
   let open Yojson.Basic.Util in
@@ -175,7 +163,7 @@ let get_state_count_map (input_str : string) (tk_nextmove : int list) :
            let cur_state =
              match cur_state_opt with
              | Some (_, num) -> num
-             | None -> invalid_class_file () (*should not get here*)
+             | None -> invalid_class_file () [@coverage off] (*should not get here*)
            in
            let cur_count =
              match Map.find state_count_map cur_state with
@@ -205,7 +193,7 @@ let get_index_count_list state_map (tk_output : (int, int list, 'a) Map.t) :
                   let cur_val_count =
                     match Map.find state_map state with
                     | Some v -> v
-                    | None -> 0
+                    | None -> 0 [@coverage off]
                   in
                   (cur_index, cur_val_count))
          in
@@ -241,10 +229,10 @@ let nb_classprobs (fv : arr) (hidden : arr) (bias : arr) : arr =
   let hidden_out = O.dot fv hidden in
   O.add hidden_out bias
 
-let run_model ?base_path:(base_p: string option = None) (input_text : string) : arr =
+let run_model ?base_path:(base_p: string option = None [@coverage off]) (input_text : string) : arr =
   (*Accept optional argument so that tests don't need to call the Sys library*)
   let working_dir_path = match base_p with
-    | None -> Sys_unix.getcwd ()
+    | None -> Sys_unix.getcwd () [@coverage off]
     | Some v -> v
   in
   
@@ -269,11 +257,11 @@ let owl_1d_array_to_list (a : arr) : 'a list =
 let rank (inp : (string * float) list) : (string * float) list =
   List.sort ~compare:(fun (_, x1) (_, x2) -> Float.compare x2 x1) inp
 
-let top_choices ?base_path:(base_p: string option = None) (input_text : string) (k_choices : int) : (string * float) list =
+let top_choices ?base_path:(base_p: string option = None [@coverage off]) (input_text : string) (k_choices : int) : (string * float) list =
   input_text |> run_model ~base_path:base_p |> norm_probs |> owl_1d_array_to_list
   |> List.zip_exn (classes () |> List.unzip |> Tuple2.get1)
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
 
-let classify ?base_path:(base_p: string option = None) (input_text : string) : (string * float) list =
+let classify ?base_path:(base_p: string option = None [@coverage off]) (input_text : string) : (string * float) list = 
   top_choices ~base_path:base_p input_text 1
