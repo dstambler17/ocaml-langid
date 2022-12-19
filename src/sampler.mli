@@ -30,3 +30,6 @@ val build_url: string -> (module Randomness) -> string option
         Params: url, Random module
 *)
 val sample_text: string -> int -> (module Randomness) -> string option
+
+
+(* val get_translated: string -> string -> string *)
