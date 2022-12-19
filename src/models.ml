@@ -11,7 +11,7 @@ type arr = O.arr
 let unimplemented () = failwith "unimplemented"
 
 let invalid_class_file () =
-  failwith
+  invalid_arg
     "Invalid class file. Should never get here unless the model files were \
      changed or tampered with"
 
@@ -241,12 +241,18 @@ let nb_classprobs (fv : arr) (hidden : arr) (bias : arr) : arr =
   let hidden_out = O.dot fv hidden in
   O.add hidden_out bias
 
-let run_model (input_text : string) : arr =
+let run_model ?base_path:(base_p: string option = None) (input_text : string) : arr =
+  (*Accept optional argument so that tests don't need to call the Sys library*)
+  let working_dir_path = match base_p with
+    | None -> Sys_unix.getcwd ()
+    | Some v -> v
+  in
+  
   (*load in all models, FSTs, and files*)
-  let tk_nextmove = load_fst_list "/Users/daniel/Documents/ocaml-langid/models/fst_feature_model_info.json" in
-  let tk_output = load_fst_map "/Users/daniel/Documents/ocaml-langid/models/fst_feature_model_info.json" in
-  let hidden_weights = load_model_file "/Users/daniel/Documents/ocaml-langid/models/nb_ptc.npy" in
-  let hidden_bias = load_model_file "/Users/daniel/Documents/ocaml-langid/models/nb_pc.npy" in
+  let tk_nextmove = load_fst_list (working_dir_path^"/models/fst_feature_model_info.json") in
+  let tk_output = load_fst_map (working_dir_path^"/models/fst_feature_model_info.json") in
+  let hidden_weights = load_model_file (working_dir_path^"/models/nb_ptc.npy") in
+  let hidden_bias = load_model_file (working_dir_path^"/models/nb_pc.npy") in
 
   (* convert text input to feature vector *)
   let feature_vec = instance2fv input_text tk_nextmove tk_output in
@@ -263,12 +269,11 @@ let owl_1d_array_to_list (a : arr) : 'a list =
 let rank (inp : (string * float) list) : (string * float) list =
   List.sort ~compare:(fun (_, x1) (_, x2) -> Float.compare x2 x1) inp
 
-let top_choices (input_text : string) (k_choices : int) : (string * float) list
-    =
-  input_text |> run_model |> norm_probs |> owl_1d_array_to_list
+let top_choices ?base_path:(base_p: string option = None) (input_text : string) (k_choices : int) : (string * float) list =
+  input_text |> run_model ~base_path:base_p |> norm_probs |> owl_1d_array_to_list
   |> List.zip_exn (classes () |> List.unzip |> Tuple2.get1)
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
 
-let classify (input_text : string) : (string * float) list =
-  top_choices input_text 1
+let classify ?base_path:(base_p: string option = None) (input_text : string) : (string * float) list =
+  top_choices ~base_path:base_p input_text 1

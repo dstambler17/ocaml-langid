@@ -10,6 +10,10 @@ module M = Models
 module S = Sampler
 module O = Owl_dense_ndarray_s
 
+(* IMPORTANT NOTE FOR COURSE ASSISTANTS GRADING THIS: IN ORDER TO TEST THE CLASSIFIER, 
+   YOU MUST CHANGE THIS VARIABLE TO YOUR TOP LEVEL WORKING DIRECTORY PATH *)
+let working_dir_path = "/Users/daniel/Documents/ocaml-langid"
+
 (* Declare a seeded random module for ease of testing. Always returns last elem *)
 module SeededRandom : Randomness = struct  
   let int (max_val: int): int = max_val - 1
@@ -27,7 +31,8 @@ let ex_model_out2 = "da"
 let ex_samples = ["en"; "da"]
 
 let test_pick_targets _ = 
-  assert_equal ("hello", "en") @@ G.pick_targets ex_samples
+  let (sample_text, lang_code ) = G.pick_targets ex_samples in
+  assert_equal true @@ (((String.(=) lang_code ex_model_out1) || (String.(=) lang_code ex_model_out2)) && ((String.length sample_text) > 0))
 
 let test_game_choices _ = 
   assert_equal [("da", false);("en", true);("es", false);("fr", false)] @@ List.sort (G.game_choices "en" ex_langs 4) ~compare:(fun (x1, _) (x2, _) -> String.compare x1 x2)
@@ -78,17 +83,19 @@ let game_tests = "Game" >: test_list [
   ]
 
 (*** MODEL TESTS ***)
+
+(*Helper function, wraps the constant at the top of file in an Option *)
+let get_working_dir_path () = Some working_dir_path
+
 let test_classes _ =
   assert_equal true @@ ((List.length (M.classes ())) = 97)
 
-(*TODO: IF CAN'T TEST, DELETE *)
-(*let test_instance2fv _ = 
-  let tk_nextmove = M.load_fst_list "models/fst_feature_model_info.json" in
-  let tk_output = M.load_fst_map "models/fst_feature_model_info.json" in
-  let fv = M.instance2fv "hello world" tk_nextmove tk_output in
-  assert_equal 4. @@ O.sum' fv;
-  assert_equal [1; 97] @@ (Array.to_list (O.shape fv))*)
+let test_instance2fv _ = 
+  let empty_map = Map.empty (module Int) in
+  let empty_list = [] in
 
+  let fv _ = M.instance2fv "hello world" empty_list empty_map  in 
+  assert_raises (Invalid_argument "Invalid class file. Should never get here unless the model files were changed or tampered with") fv
 
 let test_nb_classprobs _ =
   (* Test basic network works and keeps shape *)
@@ -104,16 +111,17 @@ let test_norm_probs _ =
   assert_equal prob_dist 1.
 
 let test_top_choices _ =
-  assert_equal [("en", 0.72809302806854248); ("it", 0.14068444073200226); ("nl", 0.058744296431541443)] @@ M.top_choices "hello world" 3
+  let choice_truths =  [("en", 0.72809302806854248); ("it", 0.14068444073200226); ("nl", 0.058744296431541443)] in
+  assert_equal choice_truths @@ M.top_choices ~base_path:(get_working_dir_path ()) "hello world" 3
 
 let test_rank _ =
   assert_equal [] @@ M.rank [];
   assert_equal [("es", 0.76); ("en", 0.16); ("da", 0.01)] @@ M.rank [ ("en", 0.16); ("da", 0.01); ("es", 0.76)]
-
+  
 let test_classify _ =
-  let classification_output_one = M.classify "hello world" in
-  let classification_output_two = M.classify "楽しいのでプールに飛び込むのが好きです" in
-  let classification_output_three = M.classify "Мне нравится нырять в бассейне, потому что это весело" in
+  let classification_output_one = M.classify ~base_path:(get_working_dir_path ())  "hello world" in
+  let classification_output_two = M.classify ~base_path:(get_working_dir_path ())  "楽しいのでプールに飛び込むのが好きです" in
+  let classification_output_three = M.classify ~base_path:(get_working_dir_path ())  "Мне нравится нырять в бассейне, потому что это весело" in
   
   assert_equal [("en", 0.72809302806854248)] @@ classification_output_one;
   assert_equal [("ja", 1.)] @@ classification_output_two;
@@ -124,7 +132,7 @@ let model_tests = "Model" >: test_list [
   (* Add tests here *)
 
   "Test Classes" >:: test_classes;
-  (*"Test Instance To Feature Vector" >:: test_instance2fv;*)
+  "Test Instance To Feature Vector" >:: test_instance2fv;
   "Test Model Inference" >:: test_nb_classprobs;
   "Test Norm Probs" >:: test_norm_probs;
   "Test Top Choices" >:: test_top_choices;
