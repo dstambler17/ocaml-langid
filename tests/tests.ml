@@ -156,7 +156,9 @@ let test_build_url _ =
   assert_equal (Some "https://en.wikipedia.org/wiki/OpenAI") @@ build_url "en" (module SeededRandom) 
 
 let test_sample_text _ =
-  assert_equal true @@ G.check_player_response 0 ex_choices
+  let sampled_res_opt =  sample_text "en" 10 (module BadRandom) in
+  assert_equal None @@ @@ sample_text "en" 10 (module BadRandom); 
+
   
 let sampler_tests = "Sampler" >: test_list [
   "Test Request URL" >:: test_get_html_body;
