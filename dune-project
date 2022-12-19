@@ -3,6 +3,10 @@
 (generate_opam_files true)
 (authors "Daniel Stambler" "Gurion Marks")
 (maintainers "dstambler17@gmail.com" "gurion@gmail.com")
+(homepage "https://github.com/dstambler17/ocaml-langid")
+(bug_reports "https://github.com/dstambler17/ocaml-langid/issues")
+(documentation "https://github.com/dstambler17/ocaml-langid")
+(source (github dstambler17/ocaml-langid))
 (package
  (name ocaml_langid)
  (allow_empty)
