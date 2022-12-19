@@ -88,4 +88,4 @@
     ppx_deriving_yojson.runtime
     models
     game
-    minicli))
+    ))

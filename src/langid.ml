@@ -3,21 +3,10 @@ open Printf
 open Stdio
 module M = Models
 module G = Game
-module CLI = Minicli.CLI
 
-let help_print () =
-  "\n\
-   Example usage:\n\
-   \t./langid.exe -mode <string> -top_n <int> -input <string> [-h;-help]\n\n\
-   Arguments:\n\
-   \t-mode:\n\
-   \t\tgame - Play a langid guessing game against the model\n\
-   \t\teval - Classify a string of text\n\
-   \t-top_n:\n\
-   \t\tNumber of predicted languages to output\n\
-   \t-input;-i:\n\
-   \t\tString to be classified if eval mode is used\n\
-   \t\tMake sure your whole string is in quotes!!\n\n"
+let usage_msg =
+  "Example usage:\n\
+   \t./langid.exe -mode <string> -top_n <int> -input <string> [-help]\n"
 
 let game_prompt () =
   "\n\
@@ -31,30 +20,44 @@ let game_prompt () =
 let bad_input_string () =
   "You gave me bad input! You don't play by the rules, you're done!"
 
+let mode = ref "eval"
+let input_text = ref ""
+let n = ref 3
+
+let speclist =
+  [
+    ( "-mode",
+      Arg.Set_string mode,
+      "Usage mode:\n\
+       \tgame - Play a langid guessing game against the model\n\
+       \teval - Classify a string of text" );
+    ( "-top_n",
+      Arg.Set_int n,
+      "Number of most-probable languages to output. Default = 3." );
+    ( "-input",
+      Arg.Set_string input_text,
+      "String to be classified if eval mode is used. Make sure your string is surrounded by quotes! Default = \"\"" );
+  ]
+
+let num_choices () = 4
+
 let top_choices_string preds () =
   preds
   |> List.map ~f:(fun (lang, prob) ->
          (List.Assoc.find_exn (M.classes ()) ~equal:String.( = ) lang, prob))
-  |> List.fold ~f:(fun str cur -> str ^ (sprintf "%s: %.2f\n" (Tuple2.get1 cur) ((Tuple2.get2 cur) *. 100.))) ~init:("")
-
-let num_choices () = 4
-
-(*
-   Do most error handling for parsing of command line args with missing input
-*)
-let get_arg_safe get_type arg_names default args =
-  let arg_raw =
-    try Some (get_type arg_names args default)
-    with CLI.No_param_for_option _ -> None
-  in
-  match arg_raw with Some m -> m | None -> default
+  |> List.fold
+       ~f:(fun str cur ->
+         str ^ sprintf "%s: %.2f\n" (Tuple2.get1 cur) (Tuple2.get2 cur *. 100.))
+       ~init:""
 
 let rec game_loop (user_score : int) (model_score : int) () =
   let sample = G.pick_targets (M.classes () |> List.unzip |> Tuple2.get1) in
   let sentence = Tuple2.get1 sample in
   let gt = Tuple2.get2 sample in
   let choices =
-    G.game_choices gt (M.classes () |> List.unzip |> Tuple2.get1) (num_choices ())
+    G.game_choices gt
+      (M.classes () |> List.unzip |> Tuple2.get1)
+      (num_choices ())
   in
   let model_correct =
     sentence |> M.classify |> List.hd_exn |> Tuple2.get1
@@ -108,29 +111,19 @@ let evaluate input_text top_k () =
     (top_choices_string k_preds ());
   Out_channel.(flush stdout)
 
-let main () =
-  let argc, args = CLI.init () in
-  if argc = 1 then (
-    printf "%s" (help_print ());
-    exit 1);
-  let mode = get_arg_safe CLI.get_string_def [ "-mode" ] "eval" args in
-  let input_text = get_arg_safe CLI.get_string_def [ "-input"; "-i" ] "" args in
-  let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 3 args in
-  let help = CLI.get_set_bool [ "-h"; "-help" ] args in
-  CLI.finalize ();
-  match help with
-  | true ->
-      printf "%s" (help_print ());
+let main mode () =
+  match !mode with
+  | "game" ->
+      Out_channel.(flush stdout);
+      printf "%s" (game_prompt ());
+      init_game ()
+  | "eval" -> evaluate !input_text !n ()
+  | _ ->
+      printf "Bad mode parameter given:\n\t%s" !mode;
       exit 1
-  | false -> (
-      match mode with
-      | "game" ->
-          Out_channel.(flush stdout);
-          printf "%s" (game_prompt ());
-          init_game ()
-      | "eval" -> evaluate input_text n ()
-      | _ ->
-          printf "Bad mode parameter given:\n\t%s" mode;
-          exit 1)
 
-let () = main ()
+let () =
+  Arg.parse speclist
+    (fun anon -> print_endline ("Anonymous argument: " ^ anon))
+    usage_msg;
+  main mode ()
