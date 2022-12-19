@@ -1,5 +1,5 @@
 (lang dune 3.4)
-(name "LangID")
+(name ocaml_langid)
 (generate_opam_files true)
 (authors "Daniel Stambler" "Gurion Marks")
 (maintainers "dstambler17@gmail.com" "gurion@gmail.com")
