@@ -21,9 +21,9 @@ Given a ground truth list, make a string to print for user options
 val user_option_string: (string * bool) list -> string
 
 (* 
-Get user input from the command line
+Basic error handle user input
 *)
-val get_user_input: int
+val handle_user_errors: string -> int
 
 (*
 Score user guess vs model output  

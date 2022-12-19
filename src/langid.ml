@@ -48,13 +48,6 @@ let get_arg_safe get_type arg_names default args =
   in
   match arg_raw with Some m -> m | None -> default
 
-(* let rec print_tuples =
-   function
-   | [] -> ()
-   | (a, b) :: rest ->
-     Printf.printf "%s, %b; " a b;
-     print_tuples rest *)
-
 let rec game_loop (user_score : int) (model_score : int) () =
   let sample = G.pick_targets (M.classes ()) in
   let sentence = Tuple2.get1 sample in
@@ -66,7 +59,12 @@ let rec game_loop (user_score : int) (model_score : int) () =
   in
   printf "Sentence: %s\nChoices (enter number):\n%s\n\n>> " sentence
     (G.user_option_string choices);
-  let user_input = G.get_user_input in
+  let user_input =
+    let raw_input =
+      Out_channel.(flush stdout);
+      In_channel.(input_line_exn stdin)
+    in
+    G.handle_user_errors raw_input in
   match user_input with
   | 0 ->
       printf "%s" (G.winner_string user_score model_score);
@@ -78,7 +76,9 @@ let rec game_loop (user_score : int) (model_score : int) () =
       exit 1
   | _ ->
       let user_correct = G.check_player_response user_input choices in
-      let user_points, model_points = G.evaluate_example user_correct model_correct in
+      let user_points, model_points =
+        G.evaluate_example user_correct model_correct
+      in
       printf "%s" (G.event_string user_correct model_correct gt);
       game_loop (user_score + user_points) (model_score + model_points) ()
 
@@ -108,6 +108,7 @@ let main () =
   let n = get_arg_safe CLI.get_int_def [ "-top_n" ] 1 args in
   let help = CLI.get_set_bool [ "-h"; "-help" ] args in
   CLI.finalize ();
+  printf "%s" game_prompt;
   match help with
   | true ->
       printf "%s" help_print;
