@@ -1,5 +1,3 @@
-[@@@ocaml.warning "-33"]
-
 open Core
 open OUnit2
 open Utils
@@ -11,7 +9,7 @@ module O = Owl_dense_ndarray_s
 
 (* IMPORTANT NOTE FOR COURSE ASSISTANTS GRADING THIS: IN ORDER TO TEST THE CLASSIFIER, 
    YOU MUST CHANGE THIS VARIABLE TO YOUR TOP LEVEL WORKING DIRECTORY PATH *)
-let working_dir_path = "/Users/gurion/Desktop/hopkins/masters/fall_22/functional_programming/ocaml-langid"
+let working_dir_path = "/Users/daniel/Documents/ocaml-langid"
 
 (* Declare a seeded random module for ease of testing. Always returns last elem *)
 module SeededRandom : Randomness = struct  

@@ -1,6 +1,3 @@
-[@@@ocaml.warning "-33"]
-[@@@ocaml.warning "-27"]
-
 open Core
 open Utils
 module S = Sampler
@@ -33,7 +30,7 @@ let pick_targets (lang_codes : string list) : string * string =
 let shuffle_and_pick_n (l : 'a list) (n : int) : 'a list =
   l
   |> List.map ~f:(fun x -> (Random.bits (), x))
-  |> List.sort ~compare:(fun (b1, x1) (b2, x2) -> compare b1 b2)
+  |> List.sort ~compare:(fun (b1, _) (b2, _) -> compare b1 b2)
   |> List.map ~f:(fun (_, x) -> x)
   |> List.filteri ~f:(fun i _ -> if i < n then true else false)
 

@@ -1,7 +1,3 @@
-[@@@ocaml.warning "-33"]
-[@@@ocaml.warning "-27"]
-[@@@ocaml.warning "-32"]
-
 open Core
 module O = Owl_dense_ndarray_s
 
@@ -133,7 +129,6 @@ let load_fst_map (file_path : string) : (int, int list, 'a) Map.t =
     input_list
     |> List.fold
          ~f:(fun acc (k, v) -> Map.add_exn acc ~key:k ~data:v)
-           (*NOTE: Exception should not occur, TODO: Double check*)
          ~init:m
   in
 
@@ -155,7 +150,6 @@ let get_state_count_map (input_str : string) (tk_nextmove : int list) :
          ~f:(fun (state_count_map, state) letter ->
            let state_look_up =
              Int.shift_left state 8 + int_of_char letter
-             (*(CamomileLibrary.UChar.int_of (CamomileLibrary.UChar.of_char letter) )*)
            in
            let cur_state_opt =
              tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up)
