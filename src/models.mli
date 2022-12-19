@@ -41,7 +41,7 @@ val norm_probs : arr -> arr
   Input String: "I am an example"
   Output: [(0.7, 'en'); (0.15, 'fr'), (.1, 'cn') ...]
 *)
-val classify : ?base_path: string option -> string -> (string * float) list
+val classify : ?base_path:string option -> string -> (string * float) list
 
 (*
   Given the model predictions, sort the model predictions according
@@ -54,4 +54,5 @@ val rank : (string * float) list -> (string * float) list
   and return the top n results
   Calls the rank and classify methods   
 *)
-val top_choices : ?base_path: string option -> string -> int -> (string * float) list
+val top_choices :
+  ?base_path:string option -> string -> int -> (string * float) list

@@ -4,7 +4,9 @@ module S = Sampler
 module M = Models
 
 (* Define error function and constants*)
-let sampling_error () = failwith "Sampling Error Occured. Inputs invalid" [@coverage off]
+let sampling_error () =
+  (failwith "Sampling Error Occured. Inputs invalid" [@coverage off])
+
 let max_sample_length () = 150
 
 (*
@@ -58,7 +60,11 @@ let user_option_string (choices : (string * bool) list) : string =
          ^ " ")
 
 let handle_user_errors (raw_input : string) : int =
-  let stopped = match raw_input |> String.lowercase |> String.strip with "stop" -> "0" | _ -> raw_input in
+  let stopped =
+    match raw_input |> String.lowercase |> String.strip with
+    | "stop" -> "0"
+    | _ -> raw_input
+  in
   let cast_input = try Some (int_of_string stopped) with Failure _ -> None in
   match cast_input with Some i -> i | None -> -1
 

@@ -36,7 +36,8 @@ let speclist =
       "Number of most-probable languages to output. Default = 3." );
     ( "-input",
       Arg.Set_string input_text,
-      "String to be classified if eval mode is used. Make sure your string is surrounded by quotes! Default = \"\"" );
+      "String to be classified if eval mode is used. Make sure your string is \
+       surrounded by quotes! Default = \"\"" );
   ]
 
 let num_choices () = 4

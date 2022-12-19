@@ -127,9 +127,7 @@ let load_fst_map (file_path : string) : (int, int list, 'a) Map.t =
   let create_map_helper (input_list : (int * int list) list) =
     let m = Map.empty (module Int) in
     input_list
-    |> List.fold
-         ~f:(fun acc (k, v) -> Map.add_exn acc ~key:k ~data:v)
-         ~init:m
+    |> List.fold ~f:(fun acc (k, v) -> Map.add_exn acc ~key:k ~data:v) ~init:m
   in
 
   let open Yojson.Basic.Util in
@@ -148,16 +146,15 @@ let get_state_count_map (input_str : string) (tk_nextmove : int list) :
     input_str
     |> String.fold
          ~f:(fun (state_count_map, state) letter ->
-           let state_look_up =
-             Int.shift_left state 8 + int_of_char letter
-           in
+           let state_look_up = Int.shift_left state 8 + int_of_char letter in
            let cur_state_opt =
              tk_nextmove |> List.findi ~f:(fun idx _ -> idx = state_look_up)
            in
            let cur_state =
              match cur_state_opt with
              | Some (_, num) -> num
-             | None -> invalid_class_file () [@coverage off] (*should not get here*)
+             | None -> invalid_class_file () [@coverage off]
+             (*should not get here*)
            in
            let cur_count =
              match Map.find state_count_map cur_state with
@@ -187,7 +184,7 @@ let get_index_count_list state_map (tk_output : (int, int list, 'a) Map.t) :
                   let cur_val_count =
                     match Map.find state_map state with
                     | Some v -> v
-                    | None -> 0 [@coverage off]
+                    | None -> (0 [@coverage off])
                   in
                   (cur_index, cur_val_count))
          in
@@ -223,18 +220,24 @@ let nb_classprobs (fv : arr) (hidden : arr) (bias : arr) : arr =
   let hidden_out = O.dot fv hidden in
   O.add hidden_out bias
 
-let run_model ?base_path:(base_p: string option = None [@coverage off]) (input_text : string) : arr =
+let run_model ?base_path:(base_p : string option = (None [@coverage off]))
+    (input_text : string) : arr =
   (*Accept optional argument so that tests don't need to call the Sys library*)
-  let working_dir_path = match base_p with
-    | None -> Sys_unix.getcwd () [@coverage off]
-    | Some v -> v
+  let working_dir_path =
+    match base_p with None -> Sys_unix.getcwd () [@coverage off] | Some v -> v
   in
-  
+
   (*load in all models, FSTs, and files*)
-  let tk_nextmove = load_fst_list (working_dir_path^"/models/fst_feature_model_info.json") in
-  let tk_output = load_fst_map (working_dir_path^"/models/fst_feature_model_info.json") in
-  let hidden_weights = load_model_file (working_dir_path^"/models/nb_ptc.npy") in
-  let hidden_bias = load_model_file (working_dir_path^"/models/nb_pc.npy") in
+  let tk_nextmove =
+    load_fst_list (working_dir_path ^ "/models/fst_feature_model_info.json")
+  in
+  let tk_output =
+    load_fst_map (working_dir_path ^ "/models/fst_feature_model_info.json")
+  in
+  let hidden_weights =
+    load_model_file (working_dir_path ^ "/models/nb_ptc.npy")
+  in
+  let hidden_bias = load_model_file (working_dir_path ^ "/models/nb_pc.npy") in
 
   (* convert text input to feature vector *)
   let feature_vec = instance2fv input_text tk_nextmove tk_output in
@@ -251,11 +254,15 @@ let owl_1d_array_to_list (a : arr) : 'a list =
 let rank (inp : (string * float) list) : (string * float) list =
   List.sort ~compare:(fun (_, x1) (_, x2) -> Float.compare x2 x1) inp
 
-let top_choices ?base_path:(base_p: string option = None [@coverage off]) (input_text : string) (k_choices : int) : (string * float) list =
-  input_text |> run_model ~base_path:base_p |> norm_probs |> owl_1d_array_to_list
+let top_choices ?base_path:(base_p : string option = (None [@coverage off]))
+    (input_text : string) (k_choices : int) : (string * float) list =
+  input_text
+  |> run_model ~base_path:base_p
+  |> norm_probs |> owl_1d_array_to_list
   |> List.zip_exn (classes () |> List.unzip |> Tuple2.get1)
   |> rank
   |> List.filteri ~f:(fun i _ -> if i < k_choices then true else false)
 
-let classify ?base_path:(base_p: string option = None [@coverage off]) (input_text : string) : (string * float) list = 
+let classify ?base_path:(base_p : string option = (None [@coverage off]))
+    (input_text : string) : (string * float) list =
   top_choices ~base_path:base_p input_text 1
